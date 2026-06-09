@@ -29,9 +29,29 @@
         </div>
     </div>
 
+    <!-- Блок объекта сада с кнопкой перехода -->
     <div th:if="${task.plantedItemId != null}" style="margin-bottom: 1.5rem;">
         <h3 style="margin-bottom: 0.5rem; color: #555; font-size: 0.9rem; text-transform: uppercase;">Объект сада</h3>
-        <p style="font-size: 1.1rem; margin: 0;" th:text="${plantedItemNames[task.plantedItemType + '_' + task.plantedItemId]} ?: 'Неизвестный объект'"></p>
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <p style="font-size: 1.1rem; margin: 0;"
+               th:text="${plantedItemNames[task.plantedItemType + '_' + task.plantedItemId]} ?: 'Неизвестный объект'"></p>
+
+            <!-- Кнопка перехода для грядки -->
+            <a th:if="${task.plantedItemType == 'BED'}"
+               th:href="@{/web/items/bed/view/{id}(id=${task.plantedItemId})}"
+               class="btn"
+               style="padding: 0.25rem 0.75rem; font-size: 0.85rem; background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7;">
+                Подробнее &rarr;
+            </a>
+
+            <!-- Кнопка перехода для дерева/куста -->
+            <a th:if="${task.plantedItemType == 'TREEBUSH'}"
+               th:href="@{/web/items/treebush/view/{id}(id=${task.plantedItemId})}"
+               class="btn"
+               style="padding: 0.25rem 0.75rem; font-size: 0.85rem; background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7;">
+                Подробнее &rarr;
+            </a>
+        </div>
     </div>
 
     <div style="margin-bottom: 1.5rem;">
