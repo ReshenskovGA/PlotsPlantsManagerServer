@@ -2,12 +2,21 @@ package com.garden.server.controller.web;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.garden.server.dto.BedDto;
+import com.garden.server.dto.PlotDto;
 import com.garden.server.dto.TaskDto;
+import com.garden.server.dto.TreebushDto;
+import com.garden.server.entity.Plant;
+import com.garden.server.entity.PlantConst;
 import com.garden.server.entity.User;
 import com.garden.server.model.RecurrenceRule;
+import com.garden.server.repository.PlantConstRepository;
+import com.garden.server.repository.PlantRepository;
 import com.garden.server.repository.UserRepository;
-import com.garden.server.service.TaskService;
+import com.garden.server.service.*;
 import com.garden.server.utils.RecurrenceUtils;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -18,8 +27,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Controller
 @RequestMapping("/web/tasks")
@@ -29,6 +37,11 @@ public class WebTaskController {
     private final UserRepository userRepository;
     private final ObjectMapper objectMapper;
     private final RecurrenceUtils recurrenceUtils;
+    private final PlotService plotService;
+    private final BedService bedService;
+    private final TreebushService treebushService;
+    private final PlantRepository plantRepository;
+    private final PlantConstRepository plantConstRepository;
 
     private Long getCurrentUserId(Authentication authentication) {
         String login = authentication.getName();
@@ -44,6 +57,63 @@ public class WebTaskController {
 
     private long toTimestamp(LocalDate date) {
         return date.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
+    }
+
+    private String getPlantName(Long plantId) {
+        if (plantId == null) return "Не посажено";
+        if (plantId < 0) {
+            return plantConstRepository.findById(Math.abs(plantId)).map(PlantConst::getName).orElse("Растение");
+        } else {
+            return plantRepository.findById(plantId).map(Plant::getName).orElse("Растение");
+        }
+    }
+
+    @Data
+    @AllArgsConstructor
+    public static class PlantedItemOption {
+        private Long id;
+        private String type;
+        private Long plotId;
+        private String displayName;
+    }
+
+    private List<PlantedItemOption> getPlantedItemOptions(Long userId) {
+        List<PlantedItemOption> options = new ArrayList<>();
+        options.add(new PlantedItemOption(null, null, null, "Не привязано"));
+        List<PlotDto.Response> plots = plotService.getPlotsByUser(userId);
+        for (PlotDto.Response plot : plots) {
+            List<BedDto.Response> beds = bedService.getBedsByPlot(plot.getId(), userId);
+            for (BedDto.Response bed : beds) {
+                String plantName = getPlantName(bed.getPlantId());
+                String name = plot.getName() + " - Грядка (" + plantName + ")";
+                options.add(new PlantedItemOption(bed.getId(), "BED", plot.getId(), name));
+            }
+            List<TreebushDto.Response> trees = treebushService.getTreebushByPlot(plot.getId(), userId);
+            for (TreebushDto.Response tree : trees) {
+                String plantName = getPlantName(tree.getPlantId());
+                String name = plot.getName() + " - Дерево/Куст (" + plantName + ")";
+                options.add(new PlantedItemOption(tree.getId(), "TREEBUSH", plot.getId(), name));
+            }
+        }
+        return options;
+    }
+
+    private Map<String, String> getPlantedItemNames(Long userId) {
+        Map<String, String> names = new HashMap<>();
+        List<PlotDto.Response> plots = plotService.getPlotsByUser(userId);
+        for (PlotDto.Response plot : plots) {
+            List<BedDto.Response> beds = bedService.getBedsByPlot(plot.getId(), userId);
+            for (BedDto.Response bed : beds) {
+                String plantName = getPlantName(bed.getPlantId());
+                names.put("BED_" + bed.getId(), plot.getName() + " - Грядка (" + plantName + ")");
+            }
+            List<TreebushDto.Response> trees = treebushService.getTreebushByPlot(plot.getId(), userId);
+            for (TreebushDto.Response tree : trees) {
+                String plantName = getPlantName(tree.getPlantId());
+                names.put("TREEBUSH_" + tree.getId(), plot.getName() + " - Дерево/Куст (" + plantName + ")");
+            }
+        }
+        return names;
     }
 
     private TaskDto.Request toRequest(TaskDto.Response r) {
@@ -80,6 +150,7 @@ public class WebTaskController {
 
         model.addAttribute("tasks", expandedTasks);
         model.addAttribute("currentFilter", filter);
+        model.addAttribute("plantedItemNames", getPlantedItemNames(userId));
         return "tasks";
     }
 
@@ -94,6 +165,7 @@ public class WebTaskController {
         List<TaskDto.Response> expandedTasks = recurrenceUtils.expandTasks(tasks, startDate, endDate);
 
         model.addAttribute("tasks", expandedTasks);
+        model.addAttribute("plantedItemNames", getPlantedItemNames(userId));
         return "calendar";
     }
 
@@ -107,15 +179,18 @@ public class WebTaskController {
         model.addAttribute("tasks", expandedTasks);
         model.addAttribute("selectedDate", date);
         model.addAttribute("formattedDate", targetDate.format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
+        model.addAttribute("plantedItemNames", getPlantedItemNames(userId));
         return "tasks-day";
     }
 
     @GetMapping("/add")
-    public String showAddForm(Model model) {
+    public String showAddForm(Authentication auth, Model model) {
+        Long userId = getCurrentUserId(auth);
         TaskDto.Request task = new TaskDto.Request();
         task.setIsCompleted(false);
         model.addAttribute("task", task);
         model.addAttribute("dateString", LocalDate.now().toString());
+        model.addAttribute("plantedItemOptions", getPlantedItemOptions(userId));
         return "task-form";
     }
 
@@ -129,6 +204,7 @@ public class WebTaskController {
             dateString = toLocalDate(task.getDate()).toString();
         }
         model.addAttribute("dateString", dateString);
+        model.addAttribute("plantedItemOptions", getPlantedItemOptions(userId));
         return "task-form";
     }
 
@@ -155,6 +231,7 @@ public class WebTaskController {
             model.addAttribute("recurrenceSummary", "Не повторяется");
         }
 
+        model.addAttribute("plantedItemNames", getPlantedItemNames(userId));
         return "task-view";
     }
 

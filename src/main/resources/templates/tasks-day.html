@@ -18,6 +18,7 @@
         <tr style="background: #f5f5f5;">
             <th style="padding: 1rem; text-align: left;">Статус</th>
             <th style="padding: 1rem; text-align: left;">Название</th>
+            <th style="padding: 1rem; text-align: left;">Объект</th>
             <th style="padding: 1rem; text-align: left;">Категория</th>
             <th style="padding: 1rem; text-align: left;">Повторение</th>
             <th style="padding: 1rem; text-align: center;">Действия</th>
@@ -29,6 +30,7 @@
             style="border-bottom: 1px solid #eee; border-left: 4px solid transparent;">
             <td style="padding: 1rem;" th:text="${task.isCompleted} ? 'Выполнено' : 'В работе'">Статус</td>
             <td style="padding: 1rem; font-weight: bold;" th:text="${task.title}">Название</td>
+            <td style="padding: 1rem;" th:text="${task.plantedItemId != null ? plantedItemNames[task.plantedItemType + '_' + task.plantedItemId] : '-'}">Объект</td>
             <td style="padding: 1rem;" th:text="${task.categoryName} ?: '-'">Категория</td>
             <td style="padding: 1rem;">
                 <span th:if="${task.id < 0}" style="background: #fff3e0; color: #e65100; padding: 2px 6px; border-radius: 4px; font-size: 0.85rem;">Цикличная</span>
@@ -47,7 +49,7 @@
             </td>
         </tr>
         <tr th:if="${#lists.isEmpty(tasks)}">
-            <td colspan="5" style="text-align: center; padding: 2rem; color: #777;">На этот день задач нет.</td>
+            <td colspan="6" style="text-align: center; padding: 2rem; color: #777;">На этот день задач нет.</td>
         </tr>
         </tbody>
     </table>

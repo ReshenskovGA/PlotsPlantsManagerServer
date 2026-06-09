@@ -141,6 +141,7 @@
                     </div>
                     <div class="task-meta">
                         <span th:if="${task.categoryName}" th:text="'[' + ${task.categoryName} + ']'">Категория</span>
+                        <span th:if="${task.plantedItemId != null}" th:text="'[' + ${plantedItemNames[task.plantedItemType + '_' + task.plantedItemId]} + ']'"></span>
                         <span th:text="${task.formattedDate}">Дата</span>
                     </div>
                 </div>

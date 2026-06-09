@@ -62,6 +62,25 @@ public class WebMainController {
         return Instant.ofEpochMilli(timestamp).atZone(ZoneId.systemDefault()).toLocalDate();
     }
 
+    private Map<String, String> getPlantedItemNames(Long userId) {
+        Map<String, String> names = new HashMap<>();
+        List<PlotDto.Response> plots = plotService.getPlotsByUser(userId);
+        for (PlotDto.Response plot : plots) {
+            List<BedDto.Response> beds = bedService.getBedsByPlot(plot.getId(), userId);
+            for (BedDto.Response bed : beds) {
+                String plantName = getPlantName(bed.getPlantId());
+                names.put("BED_" + bed.getId(), plot.getName() + " - Грядка (" + plantName + ")");
+            }
+            List<TreebushDto.Response> trees = treebushService.getTreebushByPlot(plot.getId(), userId);
+            for (TreebushDto.Response tree : trees) {
+                String plantName = getPlantName(tree.getPlantId());
+                names.put("TREEBUSH_" + tree.getId(), plot.getName() + " - Дерево/Куст (" + plantName + ")");
+            }
+        }
+        return names;
+    }
+
+    // Обновите внутренний класс DashboardTask
     @Data
     @AllArgsConstructor
     public static class DashboardTask {
@@ -71,7 +90,9 @@ public class WebMainController {
         private Long date;
         private String categoryName;
         private Boolean isCompleted;
-        private String status; // "overdue", "today", "completed"
+        private String status;
+        private Long plantedItemId;
+        private String plantedItemType;
     }
 
     @GetMapping("/dashboard")
@@ -147,7 +168,9 @@ public class WebMainController {
                     task.getDate(),
                     task.getCategoryName(),
                     task.getIsCompleted(),
-                    status
+                    status,
+                    task.getPlantedItemId(),
+                    task.getPlantedItemType()
             ));
         }
 
@@ -162,6 +185,7 @@ public class WebMainController {
         }).thenComparing(DashboardTask::getDate));
 
         model.addAttribute("todayTasks", todayTasks);
+        model.addAttribute("plantedItemNames", getPlantedItemNames(userId));
         return "dashboard";
     }
 

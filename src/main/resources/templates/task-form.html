@@ -32,6 +32,23 @@
             <input type="text" th:field="*{categoryName}" placeholder="Например: Полив, Подкормка" style="width: 100%; padding: 0.5rem;">
         </div>
 
+        <!-- Выбор объекта сада -->
+        <div style="margin-bottom: 1rem;">
+            <label>Привязка к объекту сада</label>
+            <select id="plantedItemSelect" style="width: 100%; padding: 0.5rem;">
+                <option th:each="opt : ${plantedItemOptions}"
+                        th:value="${opt.id}"
+                        th:data-type="${opt.type}"
+                        th:data-plot="${opt.plotId}"
+                        th:text="${opt.displayName}"
+                        th:selected="${task.plantedItemId != null && task.plantedItemId == opt.id && task.plantedItemType == opt.type}">
+                </option>
+            </select>
+            <input type="hidden" th:field="*{plotId}">
+            <input type="hidden" th:field="*{plantedItemId}">
+            <input type="hidden" th:field="*{plantedItemType}">
+        </div>
+
         <!-- Блок настройки цикличности задачи -->
         <div style="margin-bottom: 1rem; border: 1px solid #e0e0e0; padding: 1rem; border-radius: 8px; background: #fafafa;">
             <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: bold; margin-bottom: 1rem;">
@@ -88,7 +105,6 @@
                 </div>
             </div>
 
-            <!-- Скрытое поле, которое отправляет JSON на сервер -->
             <input type="hidden" th:field="*{recurrenceRuleJson}" id="recurrenceRuleJsonInput">
         </div>
 
@@ -116,7 +132,6 @@
         const endCountContainer = document.getElementById('endCountContainer');
         const recurrenceRuleJsonInput = document.getElementById('recurrenceRuleJsonInput');
 
-        // Если есть существующее правило, распарсим его и заполним форму
         const existingRuleJson = recurrenceRuleJsonInput.value;
         if (existingRuleJson && existingRuleJson.trim() !== '') {
             try {
@@ -196,10 +211,21 @@
         document.getElementById('endDate').addEventListener('change', generateRuleJson);
         document.getElementById('endCount').addEventListener('input', generateRuleJson);
 
-        // Инициализация при загрузке
         updateVisibility();
 
-        // Перед отправкой формы убедимся, что JSON актуален
+        // Обработка выбора объекта сада
+        const plantedItemSelect = document.getElementById('plantedItemSelect');
+        if (plantedItemSelect) {
+            function updatePlantedItemFields() {
+                const selectedOption = plantedItemSelect.options[plantedItemSelect.selectedIndex];
+                document.querySelector('input[name="plantedItemId"]').value = selectedOption.value || '';
+                document.querySelector('input[name="plantedItemType"]').value = selectedOption.getAttribute('data-type') || '';
+                document.querySelector('input[name="plotId"]').value = selectedOption.getAttribute('data-plot') || '';
+            }
+            plantedItemSelect.addEventListener('change', updatePlantedItemFields);
+            updatePlantedItemFields();
+        }
+
         document.querySelector('form').addEventListener('submit', function(e) {
             generateRuleJson();
         });

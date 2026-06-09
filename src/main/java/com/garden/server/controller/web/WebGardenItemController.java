@@ -2,6 +2,7 @@ package com.garden.server.controller.web;
 
 import com.garden.server.dto.BedDto;
 import com.garden.server.dto.PlotDto;
+import com.garden.server.dto.TaskDto;
 import com.garden.server.dto.TreebushDto;
 import com.garden.server.entity.Plant;
 import com.garden.server.entity.PlantConst;
@@ -11,7 +12,9 @@ import com.garden.server.repository.PlantRepository;
 import com.garden.server.repository.UserRepository;
 import com.garden.server.service.BedService;
 import com.garden.server.service.PlotService;
+import com.garden.server.service.TaskService;
 import com.garden.server.service.TreebushService;
+import com.garden.server.utils.RecurrenceUtils;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +24,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,6 +38,8 @@ public class WebGardenItemController {
     private final UserRepository userRepository;
     private final PlantRepository plantRepository;
     private final PlantConstRepository plantConstRepository;
+    private final TaskService taskService;
+    private final RecurrenceUtils recurrenceUtils;
 
     // === ИСПРАВЛЕНИЕ: считываем context-path из конфигурации ===
     @Value("${server.servlet.context-path:}")
@@ -168,6 +174,19 @@ public class WebGardenItemController {
         model.addAttribute("backUrl", getBackUrl(from, bed.getPlotId()));
         // === НОВОЕ: URL для перехода к растению ===
         model.addAttribute("plantViewUrl", getPlantViewUrl(bed.getPlantId()));
+
+        List<TaskDto.Response> allTasks = taskService.getTasksByUser(userId);
+        String targetType = "BED";
+
+        List<TaskDto.Response> itemTasks = allTasks.stream()
+                .filter(t -> targetType.equals(t.getPlantedItemType()) && id.equals(t.getPlantedItemId()))
+                .collect(java.util.stream.Collectors.toList());
+
+        LocalDate now = LocalDate.now();
+        List<TaskDto.Response> expandedItemTasks = recurrenceUtils.expandTasks(itemTasks, now.minusMonths(1), now.plusYears(1));
+
+        expandedItemTasks.sort(java.util.Comparator.comparing(TaskDto.Response::getDate));
+        model.addAttribute("itemTasks", expandedItemTasks);
         return "garden-item-view";
     }
 
@@ -242,6 +261,19 @@ public class WebGardenItemController {
         model.addAttribute("backUrl", getBackUrl(from, tree.getPlotId()));
         // === НОВОЕ: URL для перехода к растению ===
         model.addAttribute("plantViewUrl", getPlantViewUrl(tree.getPlantId()));
+
+        List<TaskDto.Response> allTasks = taskService.getTasksByUser(userId);
+        String targetType = "TREEBUSH";
+
+        List<TaskDto.Response> itemTasks = allTasks.stream()
+                .filter(t -> targetType.equals(t.getPlantedItemType()) && id.equals(t.getPlantedItemId()))
+                .collect(java.util.stream.Collectors.toList());
+
+        LocalDate now = LocalDate.now();
+        List<TaskDto.Response> expandedItemTasks = recurrenceUtils.expandTasks(itemTasks, now.minusMonths(1), now.plusYears(1));
+
+        expandedItemTasks.sort(java.util.Comparator.comparing(TaskDto.Response::getDate));
+        model.addAttribute("itemTasks", expandedItemTasks);
         return "garden-item-view";
     }
 }
