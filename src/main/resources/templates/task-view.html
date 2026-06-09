@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${task.title}">Задача</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div th:replace="~{layout :: header}"></div>
+<main style="max-width: 700px; margin: 2rem auto; padding: 2rem; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+    <a th:href="@{/web/tasks}" class="btn" style="background: #eee; margin-bottom: 1.5rem; display: inline-block;">&larr; Назад к списку</a>
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+        <h1 style="margin: 0;" th:text="${task.title}">Название</h1>
+        <span th:if="${task.isCompleted}"
+              style="background: #e8f5e9; color: #2e7d32; padding: 6px 12px; border-radius: 4px; font-weight: bold;">Выполнено</span>
+        <span th:unless="${task.isCompleted}"
+              style="background: #fff3e0; color: #e65100; padding: 6px 12px; border-radius: 4px; font-weight: bold;">В работе</span>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+        <div>
+            <h3 style="margin-bottom: 0.5rem; color: #555; font-size: 0.9rem; text-transform: uppercase;">Дата</h3>
+            <p style="font-size: 1.1rem; margin: 0;" th:text="${formattedDate}">Дата</p>
+        </div>
+        <div>
+            <h3 style="margin-bottom: 0.5rem; color: #555; font-size: 0.9rem; text-transform: uppercase;">Категория</h3>
+            <p style="font-size: 1.1rem; margin: 0;" th:text="${task.categoryName} ?: 'Не указана'">Категория</p>
+        </div>
+    </div>
+
+    <div style="margin-bottom: 1.5rem;">
+        <h3 style="margin-bottom: 0.5rem; color: #555; font-size: 0.9rem; text-transform: uppercase;">Повторение</h3>
+        <p style="font-size: 1.1rem; margin: 0;" th:text="${recurrenceSummary} ?: 'Не повторяется'">Повторение</p>
+    </div>
+
+    <div style="margin-bottom: 1.5rem;">
+        <h3 style="margin-bottom: 0.5rem; color: #555;">Описание</h3>
+        <p th:text="${task.description} ?: 'Описание отсутствует'" style="line-height: 1.6; margin: 0; white-space: pre-wrap;"></p>
+    </div>
+
+    <div style="display: flex; gap: 1rem; margin-top: 2rem; border-top: 1px solid #eee; padding-top: 1.5rem; flex-wrap: wrap;">
+        <a th:href="@{/web/tasks/edit/{id}(id=${task.id})}" class="btn btn-primary" style="flex: 1; text-align: center; min-width: 150px;">Редактировать</a>
+        <form th:action="@{/web/tasks/toggle/{id}(id=${task.id})}" method="post" style="flex: 1; min-width: 150px;">
+            <button type="submit" class="btn" style="width: 100%; background: #e3f2fd; color: #1565c0; border: 1px solid #90caf9;">
+                <span th:text="${task.isCompleted} ? 'Снять выполнение' : 'Отметить выполненной'">Переключить</span>
+            </button>
+        </form>
+        <form th:action="@{/web/tasks/delete/{id}(id=${task.id})}" method="post" style="flex: 1; min-width: 150px;" onsubmit="return confirm('Удалить задачу?');">
+            <button type="submit" class="btn" style="width: 100%; background: #ffebee; color: #c62828; border: 1px solid #c62828;">Удалить</button>
+        </form>
+    </div>
+</main>
+<div th:replace="~{layout :: footer}"></div>
+</body>
+</html>

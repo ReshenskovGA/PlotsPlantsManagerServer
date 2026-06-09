@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GardenManager - Управление садом</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .landing-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 80vh;
+            text-align: center;
+            padding: 2rem;
+        }
+        .landing-title {
+            font-size: 2.5rem;
+            color: #2e7d32;
+            margin-bottom: 1rem;
+        }
+        .landing-desc {
+            font-size: 1.2rem;
+            color: #555;
+            margin-bottom: 2.5rem;
+            max-width: 600px;
+            line-height: 1.6;
+        }
+        .btn-large {
+            padding: 1rem 2.5rem;
+            font-size: 1.1rem;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+<div class="landing-wrapper">
+    <h1 class="landing-title">Добро пожаловать в GardenManager</h1>
+    <p class="landing-desc">
+        Эффективное управление вашим садом и садовым питомником.
+        Отслеживайте участки, грядки, деревья, кусты, задачи и используйте справочник растений в одном месте.
+    </p>
+    <div>
+        <a th:href="@{/web/login}" class="btn btn-primary btn-large">Войти в аккаунт</a>
+    </div>
+    <p style="margin-top: 2rem; font-size: 0.9rem; color: #777;">
+        Нет аккаунта? Обратитесь к администратору или используйте API для регистрации.
+    </p>
+</div>
+</body>
+</html>

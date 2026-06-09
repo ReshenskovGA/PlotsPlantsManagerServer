@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Справочник растений</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div th:replace="~{layout :: header}"></div>
+<main>
+    <h1>Справочник растений</h1>
+    <table>
+        <thead>
+        <tr>
+            <th>Название</th>
+            <th>Категории</th>
+            <th>Описание</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="plant : ${catalogPlants}">
+            <td th:text="${plant.name}" style="font-weight: bold;">Название</td>
+            <td>
+                        <span th:each="cat, iterStat : ${plant.categories}">
+                            <span th:text="${cat}" style="background: #f3e5f5; padding: 2px 6px; border-radius: 4px; font-size: 0.85rem;"></span>
+                            <span th:if="${!iterStat.last}">, </span>
+                        </span>
+            </td>
+            <td th:text="${plant.description} ?: 'Описание отсутствует'">Описание</td>
+        </tr>
+        </tbody>
+    </table>
+</main>
+<div th:replace="~{layout :: footer}"></div>
+</body>
+</html>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${itemType} + ' - Информация'">Информация об объекте</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div th:replace="~{layout :: header}"></div>
+<main style="max-width: 700px; margin: 2rem auto; padding: 2rem; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+    <a th:href="${backUrl}" class="btn" style="background: #eee; margin-bottom: 1.5rem; display: inline-block;">&larr; Назад</a>
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <span th:style="'display:inline-block; width:28px; height:28px; border-radius:' + ${itemType == 'Грядка' ? '4px' : '50%'} + '; border:2px solid #ccc; background-color:' + ${colorHex}"></span>
+            <h1 style="margin: 0;" th:text="${itemType}">Тип объекта</h1>
+        </div>
+        <span style="background: #e3f2fd; color: #1565c0; padding: 6px 12px; border-radius: 4px; font-weight: bold;" th:text="${plot.name}">Участок</span>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+        <div>
+            <h3 style="margin-bottom: 0.5rem; color: #555; font-size: 0.9rem; text-transform: uppercase;">Растение</h3>
+            <p style="font-size: 1.1rem; font-weight: bold; margin: 0;" th:text="${plantName}">Название растения</p>
+            <!-- === НОВОЕ: кнопка перехода к просмотру растения === -->
+            <a th:if="${plantViewUrl != null}"
+               th:href="${plantViewUrl}"
+               class="btn"
+               style="margin-top: 0.5rem; padding: 0.25rem 0.75rem; font-size: 0.85rem; background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7;">
+                Подробнее о растении &rarr;
+            </a>
+        </div>
+        <div th:if="${itemType == 'Грядка'}">
+            <h3 style="margin-bottom: 0.5rem; color: #555; font-size: 0.9rem; text-transform: uppercase;">Размеры</h3>
+            <p style="font-size: 1.1rem; margin: 0;">
+                <span th:text="${item.length}"></span> м × <span th:text="${item.width}"></span> м
+                <span style="color: #666;">(<span th:text="${item.length * item.width}"></span> м²)</span>
+            </p>
+        </div>
+        <div th:if="${itemType == 'Дерево/Куст'}">
+            <h3 style="margin-bottom: 0.5rem; color: #555; font-size: 0.9rem; text-transform: uppercase;">Диаметр кроны</h3>
+            <p style="font-size: 1.1rem; margin: 0;"><span th:text="${item.diameter}"></span> м</p>
+        </div>
+        <div>
+            <h3 style="margin-bottom: 0.5rem; color: #555; font-size: 0.9rem; text-transform: uppercase;">Позиция на участке</h3>
+            <p style="font-size: 1.1rem; margin: 0;">X: <span th:text="${item.offsetX}"></span> м, Y: <span th:text="${item.offsetY}"></span> м</p>
+        </div>
+        <div>
+            <h3 style="margin-bottom: 0.5rem; color: #555; font-size: 0.9rem; text-transform: uppercase;">Цветовой маркер</h3>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span th:style="'display:inline-block; width:32px; height:32px; border-radius:' + ${itemType == 'Грядка' ? '6px' : '50%'} + '; border:2px solid #ccc; background-color:' + ${colorHex}"></span>
+                <code th:text="${colorHex}" style="color: #666; font-size: 0.95rem;">#000000</code>
+            </div>
+        </div>
+    </div>
+
+    <div style="display: flex; gap: 1rem; margin-top: 2rem; border-top: 1px solid #eee; padding-top: 1.5rem;">
+        <a th:if="${itemType == 'Грядка'}" th:href="@{/web/items/bed/edit/{id}(id=${item.id}, from=${from})}" class="btn btn-primary" style="flex: 1; text-align: center;">Редактировать</a>
+        <a th:if="${itemType == 'Дерево/Куст'}" th:href="@{/web/items/treebush/edit/{id}(id=${item.id}, from=${from})}" class="btn btn-primary" style="flex: 1; text-align: center;">Редактировать</a>
+        <form th:if="${itemType == 'Грядка'}" th:action="@{/web/items/bed/delete/{id}(id=${item.id})}" method="post" style="flex: 1;" onsubmit="return confirm('Вы уверены, что хотите удалить эту грядку?');">
+            <button type="submit" class="btn" style="width: 100%; background: #ffebee; color: #c62828; border: 1px solid #c62828;">Удалить</button>
+        </form>
+        <form th:if="${itemType == 'Дерево/Куст'}" th:action="@{/web/items/treebush/delete/{id}(id=${item.id})}" method="post" style="flex: 1;" onsubmit="return confirm('Вы уверены, что хотите удалить это дерево/куст?');">
+            <button type="submit" class="btn" style="width: 100%; background: #ffebee; color: #c62828; border: 1px solid #c62828;">Удалить</button>
+        </form>
+    </div>
+</main>
+<div th:replace="~{layout :: footer}"></div>
+</body>
+</html>

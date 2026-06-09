@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Календарь задач</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
+    <style>
+        #calendar { max-width: 1100px; margin: 2rem auto; padding: 0 1rem; }
+        .fc-event { cursor: pointer; }
+        .fc-daygrid-day-number { cursor: pointer; }
+        .legend { max-width: 1100px; margin: 1rem auto; display: flex; gap: 1rem; flex-wrap: wrap; font-size: 0.9rem; }
+        .legend span { display: flex; align-items: center; gap: 6px; }
+        .legend .dot { width: 14px; height: 14px; border-radius: 3px; display: inline-block; }
+    </style>
+</head>
+<body>
+<div th:replace="~{layout :: header}"></div>
+<main>
+    <div style="text-align: center; margin-top: 1rem;">
+        <a th:href="@{/web/tasks/add}" class="btn btn-primary">Добавить задачу</a>
+        <a th:href="@{/web/tasks}" class="btn" style="background: #eee;">Список задач</a>
+    </div>
+    <div class="legend">
+        <span><span class="dot" style="background:#c62828;"></span> Просрочено</span>
+        <span><span class="dot" style="background:#f9a825;"></span> Сегодня</span>
+        <span><span class="dot" style="background:#1565c0;"></span> В будущем</span>
+        <span><span class="dot" style="background:#388e3c;"></span> Выполнено</span>
+    </div>
+    <div id='calendar'></div>
+</main>
+<div th:replace="~{layout :: footer}"></div>
+
+<!-- Скрытое поле с CSRF-токеном, доступное для JavaScript -->
+<meta name="_csrf" th:content="${_csrf.token}"/>
+<meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+
+<script th:inline="javascript">
+    function formatDateLocal(timestamp) {
+        var d = new Date(timestamp);
+        var year = d.getFullYear();
+        var month = ('0' + (d.getMonth() + 1)).slice(-2);
+        var day = ('0' + d.getDate()).slice(-2);
+        return year + '-' + month + '-' + day;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        var calendarEl = document.getElementById('calendar');
+        var tasks = /*[[${tasks}]]*/ [];
+        var toggleUrlBase = /*[[@{/web/tasks/toggle}]]*/ '/web/tasks/toggle';
+        var dayUrlBase = /*[[@{/web/tasks/day}]]*/ '/web/tasks/day';
+
+        // Получаем CSRF-токен из meta-тега
+        var csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+
+        var today = new Date();
+        today.setHours(0, 0, 0, 0);
+        var tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+
+        var events = tasks.map(function(task) {
+            var taskDate = new Date(task.date);
+            taskDate.setHours(0, 0, 0, 0);
+
+            var bgColor, borderColor, textColor;
+            if (task.isCompleted) {
+                bgColor = '#4caf50';
+                borderColor = '#388e3c';
+                textColor = '#fff';
+            } else if (taskDate.getTime() < today.getTime()) {
+                bgColor = '#ef5350';
+                borderColor = '#c62828';
+                textColor = '#fff';
+            } else if (taskDate.getTime() < tomorrow.getTime()) {
+                bgColor = '#ffee58';
+                borderColor = '#f9a825';
+                textColor = '#333';
+            } else {
+                bgColor = '#42a5f5';
+                borderColor = '#1565c0';
+                textColor = '#fff';
+            }
+
+            return {
+                title: task.title + (task.isCompleted ? ' (Вып.)' : ''),
+                start: formatDateLocal(task.date),
+                backgroundColor: bgColor,
+                borderColor: borderColor,
+                textColor: textColor,
+                extendedProps: {
+                    id: task.id,
+                    date: task.date,
+                    description: task.description,
+                    isCompleted: task.isCompleted
+                }
+            };
+        });
+
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            locale: 'ru',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,listMonth'
+            },
+            events: events,
+            eventClick: function(info) {
+                info.jsEvent.preventDefault();
+                var actionText = info.event.extendedProps.isCompleted ? 'невыполненную' : 'выполненную';
+                if (confirm('Отметить задачу "' + info.event.title.replace(' (Вып.)', '') + '" как ' + actionText + '?')) {
+                    var form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = toggleUrlBase;
+
+                    var idInput = document.createElement('input');
+                    idInput.type = 'hidden';
+                    idInput.name = 'id';
+                    idInput.value = info.event.extendedProps.id;
+                    form.appendChild(idInput);
+
+                    var dateInput = document.createElement('input');
+                    dateInput.type = 'hidden';
+                    dateInput.name = 'date';
+                    dateInput.value = info.event.extendedProps.date;
+                    form.appendChild(dateInput);
+
+                    // === ИСПРАВЛЕНИЕ: добавляем CSRF-токен ===
+                    var csrfInput = document.createElement('input');
+                    csrfInput.type = 'hidden';
+                    csrfInput.name = '_csrf';
+                    csrfInput.value = csrfToken;
+                    form.appendChild(csrfInput);
+
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            },
+            dateClick: function(info) {
+                window.location.href = dayUrlBase + '?date=' + info.dateStr;
+            }
+        });
+        calendar.render();
+    });
+</script>
+</body>
+</html>

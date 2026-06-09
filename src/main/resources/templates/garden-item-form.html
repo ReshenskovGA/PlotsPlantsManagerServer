@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${type == 'bed'} ? 'Грядка' : 'Дерево/Куст'">Объект сада</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div th:replace="~{layout :: header}"></div>
+<main style="max-width: 600px; margin: 2rem auto; padding: 2rem; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+    <h2 th:text="${item.id != null} ? 'Редактировать объект' : 'Добавить новый объект'">Форма</h2>
+
+    <!-- ФОРМА ДЛЯ ГРЯДКИ -->
+    <form th:if="${type == 'bed'}" th:action="@{/web/items/bed/save}" method="post" th:object="${item}">
+        <input type="hidden" th:field="*{id}">
+        <input type="hidden" name="type" value="bed">
+        <div style="margin-bottom: 1rem;">
+            <label>Участок *</label>
+            <select th:field="*{plotId}" required style="width: 100%; padding: 0.5rem;">
+                <option th:each="plot : ${plots}" th:value="${plot.id}" th:text="${plot.name}"
+                        th:selected="${plot.id == selectedPlotId}"></option>
+            </select>
+        </div>
+        <div style="margin-bottom: 1rem;">
+            <label>Растение</label>
+            <select th:field="*{plantId}" style="width: 100%; padding: 0.5rem;">
+                <option th:each="opt : ${plantOptions}" th:value="${opt.id}" th:text="${opt.name}"></option>
+            </select>
+        </div>
+        <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+            <div style="flex: 1;">
+                <label>Длина (м) *</label>
+                <input type="number" step="0.1" th:field="*{length}" required style="width: 100%; padding: 0.5rem;">
+            </div>
+            <div style="flex: 1;">
+                <label>Ширина (м) *</label>
+                <input type="number" step="0.1" th:field="*{width}" required style="width: 100%; padding: 0.5rem;">
+            </div>
+        </div>
+        <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
+            <div style="flex: 1;">
+                <label>Смещение X (м)</label>
+                <input type="number" step="0.1" th:field="*{offsetX}" style="width: 100%; padding: 0.5rem;">
+            </div>
+            <div style="flex: 1;">
+                <label>Смещение Y (м)</label>
+                <input type="number" step="0.1" th:field="*{offsetY}" style="width: 100%; padding: 0.5rem;">
+            </div>
+        </div>
+        <div style="display: flex; gap: 1rem;">
+            <button type="submit" class="btn btn-primary" style="flex: 1;">Сохранить</button>
+            <a th:href="${backUrl}" class="btn" style="flex: 1; text-align: center; background: #eee;">Отмена</a>
+        </div>
+    </form>
+
+    <!-- ФОРМА ДЛЯ ДЕРЕВА/КУСТА -->
+    <form th:if="${type == 'treebush'}" th:action="@{/web/items/treebush/save}" method="post" th:object="${item}">
+        <input type="hidden" th:field="*{id}">
+        <input type="hidden" name="type" value="treebush">
+        <div style="margin-bottom: 1rem;">
+            <label>Участок *</label>
+            <select th:field="*{plotId}" required style="width: 100%; padding: 0.5rem;">
+                <option th:each="plot : ${plots}" th:value="${plot.id}" th:text="${plot.name}"
+                        th:selected="${plot.id == selectedPlotId}"></option>
+            </select>
+        </div>
+        <div style="margin-bottom: 1rem;">
+            <label>Растение</label>
+            <select th:field="*{plantId}" style="width: 100%; padding: 0.5rem;">
+                <option th:each="opt : ${plantOptions}" th:value="${opt.id}" th:text="${opt.name}"></option>
+            </select>
+        </div>
+        <div style="margin-bottom: 1rem;">
+            <label>Диаметр кроны (м) *</label>
+            <input type="number" step="0.1" th:field="*{diameter}" required style="width: 100%; padding: 0.5rem;">
+        </div>
+        <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
+            <div style="flex: 1;">
+                <label>Смещение X (м)</label>
+                <input type="number" step="0.1" th:field="*{offsetX}" style="width: 100%; padding: 0.5rem;">
+            </div>
+            <div style="flex: 1;">
+                <label>Смещение Y (м)</label>
+                <input type="number" step="0.1" th:field="*{offsetY}" style="width: 100%; padding: 0.5rem;">
+            </div>
+        </div>
+        <div style="display: flex; gap: 1rem;">
+            <button type="submit" class="btn btn-primary" style="flex: 1;">Сохранить</button>
+            <a th:href="${backUrl}" class="btn" style="flex: 1; text-align: center; background: #eee;">Отмена</a>
+        </div>
+    </form>
+</main>
+<div th:replace="~{layout :: footer}"></div>
+</body>
+</html>

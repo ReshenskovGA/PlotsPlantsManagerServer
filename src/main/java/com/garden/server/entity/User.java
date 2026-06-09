@@ -1,0 +1,29 @@
+package com.garden.server.entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+@Entity
+@Table(name = "users")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class User {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(unique = true, nullable = false, length = 50)
+    private String login;
+
+    @Column(nullable = false)
+    private String password; // Хранить только BCrypt хеш!
+
+    @Column(length = 100)
+    private String email;
+
+    @Column(length = 100)
+    private String username;
+}

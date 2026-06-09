@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управление садом</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<header th:fragment="header">
+    <nav>
+        <a th:href="@{/web/dashboard}" class="logo">GardenManager</a>
+        <ul>
+            <li><a th:href="@{/web/plots}">Участки</a></li>
+            <li><a th:href="@{/web/plants}">Список растений</a></li>
+            <li><a th:href="@{/web/plantedplants}">Посаженные растения</a></li>
+            <li><a th:href="@{/web/items}">Грядки</a></li>
+            <li><a th:href="@{/web/tasks}">Задачи</a></li>
+            <li><a th:href="@{/web/logout}">Выход</a></li>
+        </ul>
+    </nav>
+</header>
+
+<footer th:fragment="footer">
+    <p>&copy; 2026 Garden Management System. Все права защищены.</p>
+</footer>
+
+</body>
+</html>

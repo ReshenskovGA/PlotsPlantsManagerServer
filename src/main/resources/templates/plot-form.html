@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Участок</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div th:replace="~{layout :: header}"></div>
+<main style="max-width: 600px; margin: 2rem auto; padding: 2rem; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+    <h2 th:text="${plot.id != null} ? 'Редактировать участок' : 'Новый участок'">Форма</h2>
+    <form th:action="@{/web/plots/save}" method="post" enctype="multipart/form-data" th:object="${plot}">
+        <input type="hidden" th:field="*{id}">
+
+        <div style="margin-bottom: 1rem;">
+            <label>Название *</label>
+            <input type="text" th:field="*{name}" required style="width: 100%; padding: 0.5rem;">
+        </div>
+        <div style="margin-bottom: 1rem;">
+            <label>Адрес</label>
+            <input type="text" th:field="*{address}" style="width: 100%; padding: 0.5rem;">
+        </div>
+        <div style="margin-bottom: 1rem;">
+            <label>Кадастровый номер</label>
+            <input type="text" th:field="*{cadastralNumber}" style="width: 100%; padding: 0.5rem;">
+        </div>
+        <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+            <div style="flex: 1;">
+                <label>Длина (м) *</label>
+                <input type="number" step="0.1" th:field="*{length}" required style="width: 100%; padding: 0.5rem;">
+            </div>
+            <div style="flex: 1;">
+                <label>Ширина (м) *</label>
+                <input type="number" step="0.1" th:field="*{width}" required style="width: 100%; padding: 0.5rem;">
+            </div>
+        </div>
+
+        <div style="margin-bottom: 1rem;">
+            <label>Фотографии участка</label>
+            <input type="file" name="photos" multiple accept="image/*" style="width: 100%; padding: 0.5rem;">
+            <small th:if="${plot.photosUri != null and !plot.photosUri.isEmpty()}" style="color: #666;">
+                Уже загружено: <span th:text="${#strings.listJoin(plot.photosUri, ', ')}"></span>
+            </small>
+        </div>
+
+        <div style="margin-bottom: 1.5rem;">
+            <label>Фото плана участка</label>
+            <input type="file" name="planPhoto" accept="image/*" style="width: 100%; padding: 0.5rem;">
+        </div>
+
+        <div style="display: flex; gap: 1rem;">
+            <button type="submit" class="btn btn-primary" style="flex: 1;">Сохранить</button>
+            <a th:href="@{/web/plots}" class="btn" style="flex: 1; text-align: center; background: #eee;">Отмена</a>
+        </div>
+    </form>
+</main>
+<div th:replace="~{layout :: footer}"></div>
+</body>
+</html>

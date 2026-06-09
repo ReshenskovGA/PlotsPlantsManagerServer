@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${plant.name}">Растение</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div th:replace="~{layout :: header}"></div>
+<main style="max-width: 800px; margin: 2rem auto; padding: 2rem; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+    <a th:href="@{/web/plants}" class="btn" style="background: #eee; margin-bottom: 1.5rem; display: inline-block;">&larr; Назад к списку</a>
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+        <h1 style="margin: 0;" th:text="${plant.name}">Название</h1>
+        <span th:text="${plant.catalog} ? 'Справочник' : 'Личное'"
+              th:style="${plant.catalog} ? 'background: #e3f2fd; color: #1565c0; padding: 6px 12px; border-radius: 4px; font-weight: bold;' : 'background: #e8f5e9; color: #2e7d32; padding: 6px 12px; border-radius: 4px; font-weight: bold;'">
+                Источник
+            </span>
+    </div>
+
+    <div style="margin-bottom: 1.5rem;">
+        <h3 style="margin-bottom: 0.5rem; color: #555;">Категории</h3>
+        <div th:if="${plant.categories != null && !plant.categories.isEmpty()}" style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                <span th:each="cat : ${plant.categories}" th:text="${cat}"
+                      style="background: #f3e5f5; color: #6a1b9a; padding: 4px 10px; border-radius: 4px; font-size: 0.9rem;"></span>
+        </div>
+        <p th:if="${plant.categories == null || plant.categories.isEmpty()}" style="color: #777; margin: 0;">Не указаны</p>
+    </div>
+
+    <div style="margin-bottom: 1.5rem;">
+        <h3 style="margin-bottom: 0.5rem; color: #555;">Описание</h3>
+        <p th:text="${plant.description} ?: 'Описание отсутствует'" style="line-height: 1.6; margin: 0; white-space: pre-wrap;"></p>
+    </div>
+
+    <div th:if="${plant.photosUri != null && !plant.photosUri.isEmpty()}" style="margin-bottom: 1.5rem;">
+        <h3 style="margin-bottom: 0.5rem; color: #555;">Фотографии</h3>
+        <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
+            <img th:each="photo : ${plant.photosUri}" th:src="@{/uploads/{file}(file=${photo})}"
+                 style="width: 150px; height: 150px; object-fit: cover; border-radius: 8px; border: 1px solid #eee;" />
+        </div>
+    </div>
+
+    <!-- Кнопки действий только для личных растений -->
+    <div th:if="${!plant.catalog}" style="margin-top: 2rem; display: flex; gap: 1rem; border-top: 1px solid #eee; padding-top: 1.5rem;">
+        <a th:href="@{/web/plants/edit/{id}(id=${plant.id})}" class="btn btn-primary" style="flex: 1; text-align: center;">Редактировать</a>
+        <form th:action="@{/web/plants/delete/{id}(id=${plant.id})}" method="post" style="flex: 1;" onsubmit="return confirm('Вы уверены, что хотите удалить это растение?');">
+            <button type="submit" class="btn" style="width: 100%; background: #ffebee; color: #c62828; border: 1px solid #c62828;">Удалить</button>
+        </form>
+    </div>
+</main>
+<div th:replace="~{layout :: footer}"></div>
+</body>
+</html>

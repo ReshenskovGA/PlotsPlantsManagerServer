@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${task.id != null} ? 'Редактировать задачу' : 'Новая задача'">Задача</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div th:replace="~{layout :: header}"></div>
+<main style="max-width: 600px; margin: 2rem auto; padding: 2rem; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+    <h2 th:text="${task.id != null} ? 'Редактировать задачу' : 'Новая задача'">Форма</h2>
+    <form th:action="@{/web/tasks/save}" method="post" th:object="${task}">
+        <input type="hidden" th:field="*{id}">
+
+        <div style="margin-bottom: 1rem;">
+            <label>Название *</label>
+            <input type="text" th:field="*{title}" required style="width: 100%; padding: 0.5rem;">
+        </div>
+
+        <div style="margin-bottom: 1rem;">
+            <label>Описание</label>
+            <textarea th:field="*{description}" rows="4" style="width: 100%; padding: 0.5rem;"></textarea>
+        </div>
+
+        <div style="margin-bottom: 1rem;">
+            <label>Дата выполнения *</label>
+            <input type="date" name="dateString" th:value="${dateString}" required style="width: 100%; padding: 0.5rem;">
+        </div>
+
+        <div style="margin-bottom: 1rem;">
+            <label>Категория</label>
+            <input type="text" th:field="*{categoryName}" placeholder="Например: Полив, Подкормка" style="width: 100%; padding: 0.5rem;">
+        </div>
+
+        <!-- Блок настройки цикличности задачи -->
+        <div style="margin-bottom: 1rem; border: 1px solid #e0e0e0; padding: 1rem; border-radius: 8px; background: #fafafa;">
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: bold; margin-bottom: 1rem;">
+                <input type="checkbox" id="enableRecurrence" style="width: auto; margin: 0;">
+                Повторять задачу
+            </label>
+
+            <div id="recurrenceSettings" style="display: none;">
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.25rem; font-size: 0.9rem;">Тип повторения</label>
+                    <select id="recurrenceType" style="width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px;">
+                        <option value="DAILY">Каждый день</option>
+                        <option value="WEEKLY">Каждую неделю</option>
+                        <option value="MONTHLY">Каждый месяц</option>
+                        <option value="YEARLY">Каждый год</option>
+                    </select>
+                </div>
+
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.25rem; font-size: 0.9rem;">Интервал (раз в)</label>
+                    <input type="number" id="recurrenceInterval" value="1" min="1" style="width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px;">
+                </div>
+
+                <div id="weeklyDays" style="display: none; margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem;">Дни недели</label>
+                    <div style="display: flex; flex-wrap: wrap; gap: 0.75rem;">
+                        <label style="display: flex; align-items: center; gap: 4px; cursor: pointer;"><input type="checkbox" class="week-day" value="1"> Пн</label>
+                        <label style="display: flex; align-items: center; gap: 4px; cursor: pointer;"><input type="checkbox" class="week-day" value="2"> Вт</label>
+                        <label style="display: flex; align-items: center; gap: 4px; cursor: pointer;"><input type="checkbox" class="week-day" value="3"> Ср</label>
+                        <label style="display: flex; align-items: center; gap: 4px; cursor: pointer;"><input type="checkbox" class="week-day" value="4"> Чт</label>
+                        <label style="display: flex; align-items: center; gap: 4px; cursor: pointer;"><input type="checkbox" class="week-day" value="5"> Пт</label>
+                        <label style="display: flex; align-items: center; gap: 4px; cursor: pointer;"><input type="checkbox" class="week-day" value="6"> Сб</label>
+                        <label style="display: flex; align-items: center; gap: 4px; cursor: pointer;"><input type="checkbox" class="week-day" value="7"> Вс</label>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.25rem; font-size: 0.9rem;">Завершение повторения</label>
+                    <select id="endType" style="width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px;">
+                        <option value="NEVER">Никогда</option>
+                        <option value="DATE">До даты</option>
+                        <option value="COUNT">После количества повторений</option>
+                    </select>
+                </div>
+
+                <div id="endDateContainer" style="display: none; margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.25rem; font-size: 0.9rem;">Дата завершения</label>
+                    <input type="date" id="endDate" style="width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px;">
+                </div>
+
+                <div id="endCountContainer" style="display: none; margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.25rem; font-size: 0.9rem;">Количество повторений</label>
+                    <input type="number" id="endCount" value="1" min="1" style="width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px;">
+                </div>
+            </div>
+
+            <!-- Скрытое поле, которое отправляет JSON на сервер -->
+            <input type="hidden" th:field="*{recurrenceRuleJson}" id="recurrenceRuleJsonInput">
+        </div>
+
+        <div style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 8px;">
+            <input type="checkbox" th:field="*{isCompleted}" style="width: auto; margin: 0;">
+            <label for="isCompleted" style="margin: 0; cursor: pointer;">Задача выполнена</label>
+        </div>
+
+        <div style="display: flex; gap: 1rem;">
+            <button type="submit" class="btn btn-primary" style="flex: 1;">Сохранить</button>
+            <a th:href="@{/web/tasks}" class="btn" style="flex: 1; text-align: center; background: #eee;">Отмена</a>
+        </div>
+    </form>
+</main>
+<div th:replace="~{layout :: footer}"></div>
+
+<script th:inline="javascript">
+    document.addEventListener('DOMContentLoaded', function() {
+        const enableRecurrence = document.getElementById('enableRecurrence');
+        const recurrenceSettings = document.getElementById('recurrenceSettings');
+        const recurrenceType = document.getElementById('recurrenceType');
+        const weeklyDays = document.getElementById('weeklyDays');
+        const endType = document.getElementById('endType');
+        const endDateContainer = document.getElementById('endDateContainer');
+        const endCountContainer = document.getElementById('endCountContainer');
+        const recurrenceRuleJsonInput = document.getElementById('recurrenceRuleJsonInput');
+
+        // Если есть существующее правило, распарсим его и заполним форму
+        const existingRuleJson = recurrenceRuleJsonInput.value;
+        if (existingRuleJson && existingRuleJson.trim() !== '') {
+            try {
+                const rule = JSON.parse(existingRuleJson);
+                if (rule.type && rule.type !== 'NONE') {
+                    enableRecurrence.checked = true;
+                    recurrenceSettings.style.display = 'block';
+                    recurrenceType.value = rule.type;
+                    if (rule.interval) document.getElementById('recurrenceInterval').value = rule.interval;
+
+                    if (rule.type === 'WEEKLY' && rule.weekDays) {
+                        weeklyDays.style.display = 'block';
+                        rule.weekDays.forEach(day => {
+                            const cb = document.querySelector(`.week-day[value="${day}"]`);
+                            if (cb) cb.checked = true;
+                        });
+                    }
+
+                    if (rule.endType) {
+                        endType.value = rule.endType;
+                        if (rule.endType === 'DATE' && rule.endDate) {
+                            const d = new Date(rule.endDate);
+                            document.getElementById('endDate').value = d.toISOString().split('T')[0];
+                        } else if (rule.endType === 'COUNT' && rule.endCount) {
+                            document.getElementById('endCount').value = rule.endCount;
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error("Ошибка парсинга правила повторения", e);
+            }
+        }
+
+        function updateVisibility() {
+            recurrenceSettings.style.display = enableRecurrence.checked ? 'block' : 'none';
+            weeklyDays.style.display = recurrenceType.value === 'WEEKLY' ? 'block' : 'none';
+            endDateContainer.style.display = endType.value === 'DATE' ? 'block' : 'none';
+            endCountContainer.style.display = endType.value === 'COUNT' ? 'block' : 'none';
+            generateRuleJson();
+        }
+
+        function generateRuleJson() {
+            if (!enableRecurrence.checked) {
+                recurrenceRuleJsonInput.value = '';
+                return;
+            }
+
+            const rule = {
+                type: recurrenceType.value,
+                interval: parseInt(document.getElementById('recurrenceInterval').value) || 1,
+                endType: endType.value
+            };
+
+            if (rule.type === 'WEEKLY') {
+                const days = [];
+                document.querySelectorAll('.week-day:checked').forEach(cb => days.push(parseInt(cb.value)));
+                if (days.length > 0) rule.weekDays = days;
+            }
+
+            if (rule.endType === 'DATE') {
+                const dateVal = document.getElementById('endDate').value;
+                if (dateVal) {
+                    rule.endDate = new Date(dateVal).getTime();
+                }
+            } else if (rule.endType === 'COUNT') {
+                rule.endCount = parseInt(document.getElementById('endCount').value) || 1;
+            }
+
+            recurrenceRuleJsonInput.value = JSON.stringify(rule);
+        }
+
+        enableRecurrence.addEventListener('change', updateVisibility);
+        recurrenceType.addEventListener('change', updateVisibility);
+        endType.addEventListener('change', updateVisibility);
+        document.querySelectorAll('.week-day').forEach(cb => cb.addEventListener('change', generateRuleJson));
+        document.getElementById('recurrenceInterval').addEventListener('input', generateRuleJson);
+        document.getElementById('endDate').addEventListener('change', generateRuleJson);
+        document.getElementById('endCount').addEventListener('input', generateRuleJson);
+
+        // Инициализация при загрузке
+        updateVisibility();
+
+        // Перед отправкой формы убедимся, что JSON актуален
+        document.querySelector('form').addEventListener('submit', function(e) {
+            generateRuleJson();
+        });
+    });
+</script>
+</body>
+</html>

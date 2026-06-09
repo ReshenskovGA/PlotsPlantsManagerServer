@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Растение</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div th:replace="~{layout :: header}"></div>
+<main style="max-width: 600px; margin: 2rem auto; padding: 2rem; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+    <h2 th:text="${plant.id != null} ? 'Редактировать растение' : 'Новое личное растение'">Форма</h2>
+    <form th:action="@{/web/plants/save}" method="post" enctype="multipart/form-data" th:object="${plant}">
+        <input type="hidden" th:field="*{id}">
+
+        <div style="margin-bottom: 1rem;">
+            <label>Название *</label>
+            <input type="text" th:field="*{name}" required style="width: 100%; padding: 0.5rem;">
+        </div>
+
+        <div style="margin-bottom: 1rem;">
+            <label>Описание</label>
+            <textarea th:field="*{description}" rows="4" style="width: 100%; padding: 0.5rem;"></textarea>
+        </div>
+
+        <div style="margin-bottom: 1.5rem;">
+            <label style="font-weight: bold; display: block; margin-bottom: 0.5rem;">Категории:</label>
+            <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                <div th:each="cat : ${allCategories}">
+                    <label style="display: flex; align-items: center; gap: 0.25rem; font-size: 0.9rem; cursor: pointer;">
+                        <input type="checkbox" name="categories" th:value="${cat}"
+                               th:checked="${plant.categories != null and plant.categories.contains(cat)}">
+                        <span th:text="${cat}">Категория</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 1.5rem;">
+            <label>Фотографии</label>
+            <input type="file" name="photos" multiple accept="image/*" style="width: 100%; padding: 0.5rem;">
+            <small th:if="${plant.photosUri != null and !plant.photosUri.isEmpty()}" style="color: #666; display: block; margin-top: 0.5rem;">
+                Уже загружено фото: <span th:text="${plant.photosUri.size()} + ' шт.'"></span>
+            </small>
+        </div>
+
+        <div style="display: flex; gap: 1rem;">
+            <button type="submit" class="btn btn-primary" style="flex: 1;">Сохранить</button>
+            <a th:href="@{/web/plants}" class="btn" style="flex: 1; text-align: center; background: #eee;">Отмена</a>
+        </div>
+    </form>
+</main>
+<div th:replace="~{layout :: footer}"></div>
+</body>
+</html>

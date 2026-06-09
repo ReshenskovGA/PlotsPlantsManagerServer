@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Посаженные растения</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div th:replace="~{layout :: header}"></div>
+<main style="padding: 2rem;">
+    <h1>Посаженные растения</h1>
+    <p style="color: #666; margin-bottom: 1.5rem;">
+        Растения, которые фактически высажены на ваших участках.
+    </p>
+
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; min-width: 900px;">
+            <thead>
+            <tr style="background: #f5f5f5;">
+                <th style="padding: 1rem; text-align: left;">Источник</th>
+                <th style="padding: 1rem; text-align: left;">Название</th>
+                <th style="padding: 1rem; text-align: left;">Место посадки</th>
+                <th style="padding: 1rem; text-align: left;">Категории</th>
+                <th style="padding: 1rem; text-align: center;">Действия</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="plant : ${plants}" style="border-bottom: 1px solid #eee;">
+                <td style="padding: 1rem;">
+                            <span th:text="${plant.catalog} ? 'Справочник' : 'Личное'"
+                                  th:style="${plant.catalog} ? 'background: #e3f2fd; color: #1565c0; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem; white-space: nowrap;' : 'background: #e8f5e9; color: #2e7d32; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem; white-space: nowrap;'">
+                                Источник
+                            </span>
+                </td>
+                <td style="padding: 1rem; font-weight: bold;" th:text="${plant.name}">Название</td>
+                <td style="padding: 1rem;">
+                    <div th:each="loc, iterStat : ${plant.locations}" style="margin-bottom: 4px;">
+                                <span style="font-size: 0.9rem;">
+                                    <strong th:text="${loc.plotName}">Участок</strong>,
+                                    <span th:text="${loc.objectType}">Грядка</span>
+                                </span>
+                    </div>
+                </td>
+                <td style="padding: 1rem;">
+                            <span th:each="cat : ${plant.categories}" th:text="${cat}"
+                                  style="background: #f3e5f5; padding: 2px 6px; border-radius: 4px; font-size: 0.85rem; margin-right: 4px; display: inline-block; margin-bottom: 2px;"></span>
+                    <span th:if="${plant.categories == null || plant.categories.isEmpty()}" style="color: #999;">-</span>
+                </td>
+                <td style="padding: 1rem; text-align: center; white-space: nowrap;">
+                    <a th:href="@{/web/plantedplants/view/{id}(id=${plant.id}, source=${plant.catalog} ? 'catalog' : 'personal')}"
+                       class="btn"
+                       style="padding: 0.25rem 0.75rem; font-size: 0.9rem; background: #e3f2fd; color: #1565c0; border: 1px solid #90caf9;">
+                        Просмотр
+                    </a>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(plants)}">
+                <td colspan="5" style="text-align: center; padding: 3rem; color: #777; background: #f9f9f9;">
+                    Посаженные растения не найдены.<br>
+                    <small>Высадите растения на грядки или деревья/кусты через детальную страницу участка.</small>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+<div th:replace="~{layout :: footer}"></div>
+</body>
+</html>

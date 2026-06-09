@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Главная панель</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .nav-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem 1rem;
+            background: #fff;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            text-decoration: none;
+            color: #333;
+            font-weight: bold;
+            font-size: 1rem;
+            transition: all 0.2s;
+            text-align: center;
+        }
+        .nav-btn:hover {
+            border-color: #4caf50;
+            background: #f1f8e9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .nav-btn .sub {
+            font-size: 0.85rem;
+            color: #666;
+            font-weight: normal;
+            margin-top: 0.25rem;
+        }
+        .nav-btn .counter {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2e7d32;
+            margin-top: 0.25rem;
+        }
+        .task-list {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 1.5rem;
+        }
+        .task-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+            border-left: 4px solid;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .task-item.overdue   { background: #ffebee; border-left-color: #c62828; }
+        .task-item.today     { background: #fffde7; border-left-color: #f9a825; }
+        .task-item.completed { background: #f5f5f5; border-left-color: #9e9e9e; opacity: 0.7; }
+        .task-title { font-weight: bold; }
+        .task-title.done { text-decoration: line-through; color: #888; }
+        .task-meta { font-size: 0.85rem; color: #666; margin-top: 2px; }
+        .task-badge {
+            display: inline-block;
+            font-size: 0.75rem;
+            font-weight: bold;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+        .task-badge.overdue { background: #c62828; color: #fff; }
+        .legend { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; font-size: 0.85rem; }
+        .legend span { display: flex; align-items: center; gap: 4px; }
+        .legend .dot { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+    </style>
+</head>
+<body>
+<div th:replace="~{layout :: header}"></div>
+<main style="max-width: 1100px; margin: 2rem auto; padding: 0 1rem;">
+    <h1 style="margin-bottom: 0.5rem;">Добро пожаловать, <span th:text="${user.username}">Пользователь</span>!</h1>
+    <p style="margin-bottom: 2rem; font-size: 1.1rem; color: #666;">Управляйте своим садом эффективно.</p>
+
+    <!-- Навигационные кнопки со счётчиками -->
+    <div class="nav-grid">
+        <a th:href="@{/web/plots}" class="nav-btn">
+            Мои участки
+            <span class="counter" th:text="${plotsCount}">0</span>
+            <span class="sub">участков</span>
+        </a>
+        <a th:href="@{/web/plants}" class="nav-btn">
+            Список растений
+            <span class="sub">Справочник и личные</span>
+        </a>
+        <a th:href="@{/web/plantedplants}" class="nav-btn">
+            Посаженные растения
+            <span class="counter" th:text="${plantedPlantsCount}">0</span>
+            <span class="sub">видов на участках</span>
+        </a>
+        <a th:href="@{/web/items}" class="nav-btn">
+            Грядки
+            <span class="counter" th:text="${gardenItemsCount}">0</span>
+            <span class="sub">грядок и деревьев</span>
+        </a>
+        <a th:href="@{/web/tasks}" class="nav-btn">
+            Задачи
+            <span class="counter" th:text="${tasksCount}">0</span>
+            <span class="sub">всего задач</span>
+        </a>
+        <a th:href="@{/web/tasks/calendar}" class="nav-btn">
+            Календарь
+            <span class="counter" th:text="${calendarTasksCount}">0</span>
+            <span class="sub">невыполненных задач</span>
+        </a>
+    </div>
+
+    <!-- Список задач: просроченные + на сегодня -->
+    <div class="task-list">
+        <h2 style="margin-top: 0; margin-bottom: 1rem; color: #2e7d32;">Просроченные задачи и задачи на сегодня</h2>
+        <div class="legend">
+            <span><span class="dot" style="background:#c62828;"></span> Просрочено</span>
+            <span><span class="dot" style="background:#f9a825;"></span> Сегодня (в работе)</span>
+            <span><span class="dot" style="background:#9e9e9e;"></span> Сегодня (выполнено)</span>
+        </div>
+        <div th:if="${todayTasks != null and !todayTasks.isEmpty()}">
+            <div th:each="task : ${todayTasks}"
+                 th:class="'task-item ' + ${task.status}">
+                <div style="flex: 1; min-width: 200px;">
+                    <div>
+                        <span th:class="'task-title' + ${task.isCompleted ? ' done' : ''}"
+                              th:text="${task.title}">Название задачи</span>
+                        <span th:if="${task.status == 'overdue'}" class="task-badge overdue">Просрочено</span>
+                    </div>
+                    <div class="task-meta">
+                        <span th:if="${task.categoryName}" th:text="'[' + ${task.categoryName} + ']'">Категория</span>
+                        <span th:text="${task.formattedDate}">Дата</span>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                    <form th:action="@{/web/tasks/toggle}" method="post" style="display: inline;">
+                        <input type="hidden" name="id" th:value="${task.id}">
+                        <input type="hidden" name="date" th:value="${task.date}">
+                        <button type="submit" class="btn"
+                                th:text="${task.isCompleted} ? 'Отменить' : 'Выполнить'"
+                                style="padding: 0.25rem 0.75rem; font-size: 0.85rem; background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7;">
+                        </button>
+                    </form>
+                    <a th:href="@{/web/tasks/view/{id}(id=${task.id})}" class="btn"
+                       style="padding: 0.25rem 0.75rem; font-size: 0.85rem; background: #e3f2fd; color: #1565c0;">Просмотр</a>
+                </div>
+            </div>
+        </div>
+        <p th:if="${todayTasks == null or todayTasks.isEmpty()}"
+           style="color: #777; text-align: center; padding: 1rem; margin: 0;">
+            Просроченных задач и задач на сегодня нет, можешь отдыхать.
+        </p>
+    </div>
+</main>
+<div th:replace="~{layout :: footer}"></div>
+</body>
+</html>

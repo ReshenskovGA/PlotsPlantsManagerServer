@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${plant.name} + ' - Посаженные растения'">Растение</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div th:replace="~{layout :: header}"></div>
+<main style="max-width: 900px; margin: 2rem auto; padding: 2rem; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+    <a th:href="@{/web/plantedplants}" class="btn" style="background: #eee; margin-bottom: 1.5rem; display: inline-block;">&larr; Назад к списку</a>
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+        <h1 style="margin: 0;" th:text="${plant.name}">Название растения</h1>
+        <span th:text="${plant.catalog} ? 'Из справочника' : 'Личное растение'"
+              th:style="${plant.catalog} ? 'background: #e3f2fd; color: #1565c0; padding: 6px 12px; border-radius: 4px; font-weight: bold;' : 'background: #e8f5e9; color: #2e7d32; padding: 6px 12px; border-radius: 4px; font-weight: bold;'">
+                Источник
+            </span>
+    </div>
+
+    <div style="margin-bottom: 1.5rem;">
+        <h3 style="margin-bottom: 0.5rem; color: #555;">Категории</h3>
+        <div th:if="${plant.categories != null && !plant.categories.isEmpty()}" style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                <span th:each="cat : ${plant.categories}" th:text="${cat}"
+                      style="background: #f3e5f5; color: #6a1b9a; padding: 4px 10px; border-radius: 4px; font-size: 0.9rem;"></span>
+        </div>
+        <p th:if="${plant.categories == null || plant.categories.isEmpty()}" style="color: #777; margin: 0;">Не указаны</p>
+    </div>
+
+    <div style="margin-bottom: 1.5rem;">
+        <h3 style="margin-bottom: 0.5rem; color: #555;">Описание</h3>
+        <p th:text="${plant.description} ?: 'Описание отсутствует'" style="line-height: 1.6; margin: 0; white-space: pre-wrap;"></p>
+    </div>
+
+    <div th:if="${plant.photosUri != null && !plant.photosUri.isEmpty()}" style="margin-bottom: 2rem;">
+        <h3 style="margin-bottom: 0.5rem; color: #555;">Фотографии</h3>
+        <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
+            <img th:each="photo : ${plant.photosUri}" th:src="@{/uploads/{file}(file=${photo})}"
+                 style="width: 150px; height: 150px; object-fit: cover; border-radius: 8px; border: 1px solid #eee;" />
+        </div>
+    </div>
+
+    <!-- Блок с информацией о местах посадки -->
+    <div style="border-top: 2px solid #eee; padding-top: 1.5rem; margin-top: 2rem;">
+        <h2 style="margin-bottom: 1rem; color: #2e7d32;">Места посадки</h2>
+
+        <div th:if="${plant.locations != null && !plant.locations.isEmpty()}" style="display: flex; flex-direction: column; gap: 1rem;">
+            <div th:each="loc : ${plant.locations}" style="background: #f9f9f9; padding: 1rem; border-radius: 8px; border-left: 4px solid #4caf50; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                <div>
+                    <div style="font-weight: bold; font-size: 1.1rem; margin-bottom: 0.25rem;" th:text="${loc.plotName}">Название участка</div>
+                    <div style="color: #666;" th:text="${loc.objectType}">Тип объекта</div>
+                </div>
+
+                <!-- Условные кнопки перехода к конкретному объекту -->
+                <a th:if="${loc.objectType == 'Грядка'}"
+                   th:href="@{/web/items/bed/view/{id}(id=${loc.objectId})}"
+                   class="btn btn-primary" style="white-space: nowrap;">
+                    Просмотр грядки
+                </a>
+                <a th:if="${loc.objectType == 'Дерево/Куст'}"
+                   th:href="@{/web/items/treebush/view/{id}(id=${loc.objectId})}"
+                   class="btn btn-primary" style="white-space: nowrap;">
+                    Просмотр дерева/куста
+                </a>
+            </div>
+        </div>
+
+        <div th:if="${plant.locations == null || plant.locations.isEmpty()}" style="color: #777; padding: 1rem; background: #f9f9f9; border-radius: 8px;">
+            Информация о местах посадки отсутствует.
+        </div>
+    </div>
+
+    <!-- Кнопки действий только для личных растений -->
+    <div th:if="${!plant.catalog}" style="margin-top: 2rem; display: flex; gap: 1rem; border-top: 1px solid #eee; padding-top: 1.5rem;">
+        <a th:href="@{/web/plants/edit/{id}(id=${plant.id})}" class="btn btn-primary" style="flex: 1; text-align: center;">Редактировать растение</a>
+        <form th:action="@{/web/plants/delete/{id}(id=${plant.id})}" method="post" style="flex: 1;" onsubmit="return confirm('Вы уверены, что хотите удалить это растение? Это не удалит его с грядок, но уберет из вашего справочника.');">
+            <button type="submit" class="btn" style="width: 100%; background: #ffebee; color: #c62828; border: 1px solid #c62828;">Удалить из личных</button>
+        </form>
+    </div>
+</main>
+<div th:replace="~{layout :: footer}"></div>
+</body>
+</html>

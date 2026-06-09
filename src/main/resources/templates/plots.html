@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Мои участки</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div th:replace="~{layout :: header}"></div>
+<main style="padding: 2rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <h1>Мои участки</h1>
+        <a th:href="@{/web/plots/add}" class="btn btn-primary">Добавить участок</a>
+    </div>
+
+    <form th:action="@{/web/plots}" method="get" style="margin-bottom: 1.5rem; display: flex; gap: 1rem;">
+        <input type="text" name="search" th:value="${search}" placeholder="Поиск по названию или адресу..." style="flex: 1; padding: 0.5rem;">
+        <button type="submit" class="btn btn-primary">Найти</button>
+        <a th:href="@{/web/plots}" class="btn" style="background: #eee;">Сбросить</a>
+    </form>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
+        <div th:each="plot : ${plots}" style="border: 1px solid #eee; border-radius: 8px; padding: 1.5rem; background: #fff;">
+            <h3 style="margin-top: 0;" th:text="${plot.name}">Название участка</h3>
+            <p style="color: #666; margin-bottom: 1rem;" th:text="${plot.address} ?: 'Адрес не указан'">Адрес</p>
+            <p style="margin-bottom: 1.5rem;">
+                <strong>Размер:</strong> <span th:text="${plot.length} + ' x ' + ${plot.width} + ' м'"></span><br>
+                <strong>Площадь:</strong> <span th:text="${plot.length * plot.width} + ' м²'"></span>
+            </p>
+
+            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                <!-- Главная кнопка перехода к детальной информации -->
+                <a th:href="@{/web/plots/{id}(id=${plot.id})}" class="btn btn-primary" style="text-align: center; width: 100%;">Смотреть информацию</a>
+
+                <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+                    <a th:href="@{/web/plots/edit/{id}(id=${plot.id})}" class="btn" style="flex: 1; text-align: center; font-size: 0.9rem;">Изменить участок</a>
+                    <form th:action="@{/web/plots/delete/{id}(id=${plot.id})}" method="post" style="flex: 1;" onsubmit="return confirm('Удалить участок и все объекты на нем?');">
+                        <button type="submit" class="btn" style="width: 100%; background: #ffebee; color: #c62828; font-size: 0.9rem;">Удалить</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div th:if="${#lists.isEmpty(plots)}" style="grid-column: 1 / -1; text-align: center; padding: 3rem; color: #777; background: #f9f9f9; border-radius: 8px;">
+            У вас пока нет участков. Нажмите "Добавить участок", чтобы начать.
+        </div>
+    </div>
+</main>
+<div th:replace="~{layout :: footer}"></div>
+</body>
+</html>
