@@ -139,13 +139,31 @@ public class WebPlantController {
     @PostMapping("/save")
     public String savePlant(@ModelAttribute PlantDto.Request request,
                             @RequestParam(value = "photos", required = false) List<MultipartFile> photos,
+                            @RequestParam(value = "keptPhotos", required = false) List<String> keptPhotos,
                             Authentication auth) {
         Long userId = getCurrentUserId(auth);
-        List<String> photoNames = fileStorageService.storeFiles(photos);
-        if (request.getPhotosUri() != null) {
-            photoNames.addAll(0, request.getPhotosUri());
+
+        List<String> finalPhotos = new ArrayList<>();
+        if (keptPhotos != null) {
+            finalPhotos.addAll(keptPhotos);
         }
-        request.setPhotosUri(photoNames);
+
+        // Удаляем с диска фотографии, которые пользователь снял с галочки
+        if (request.getId() != null) {
+            PlantDto.Response existingPlant = plantService.getPlantById(request.getId(), userId);
+            if (existingPlant.getPhotosUri() != null) {
+                List<String> photosToRemove = new ArrayList<>(existingPlant.getPhotosUri());
+                photosToRemove.removeAll(finalPhotos);
+                for (String removed : photosToRemove) {
+                    fileStorageService.deleteFile(removed);
+                }
+            }
+        }
+
+        // Добавляем новые загруженные фотографии
+        List<String> newPhotoNames = fileStorageService.storeFiles(photos);
+        finalPhotos.addAll(newPhotoNames);
+        request.setPhotosUri(finalPhotos);
 
         if (request.getId() != null) {
             plantService.updatePlant(request.getId(), request, userId);

@@ -21,6 +21,22 @@
         <p th:if="${plot.cadastralNumber}" style="margin: 0.5rem 0;"><strong>Кадастровый номер:</strong> <span th:text="${plot.cadastralNumber}"></span></p>
     </div>
 
+    <div th:if="${plot.photosUri != null and !plot.photosUri.isEmpty()}" style="background: #fff; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 2rem;">
+        <h2 style="margin: 0 0 1rem 0; color: #555;">Фотографии участка</h2>
+        <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
+            <img th:each="photo : ${plot.photosUri}"
+                 th:src="@{/uploads/{file}(file=${photo})}"
+                 style="width: 150px; height: 150px; object-fit: cover; border-radius: 8px; border: 1px solid #eee; cursor: pointer;"
+                 onclick="window.open(this.src, '_blank')">
+            0</div>
+    </div>
+
+    <div th:if="${plot.planPhotoUri != null and !plot.planPhotoUri.isEmpty()}" style="background: #fff; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 2rem;">
+        <h2 style="margin: 0 0 1rem 0; color: #555;">План участка</h2>
+        <img th:src="@{/uploads/{file}(file=${plot.planPhotoUri})}"
+             style="max-width: 100%; height: auto; border-radius: 8px; border: 1px solid #eee;">
+    </div>
+
     <!-- Блок ГРЯДКИ -->
     <div style="background: #fff; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 2rem;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 1rem;">

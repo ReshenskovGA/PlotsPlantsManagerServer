@@ -20,11 +20,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Controller
 @RequestMapping("/web/plots")
@@ -121,15 +117,53 @@ public class WebPlotController {
     public String savePlot(@ModelAttribute PlotDto.Request request,
                            @RequestParam(value = "photos", required = false) List<MultipartFile> photos,
                            @RequestParam(value = "planPhoto", required = false) MultipartFile planPhoto,
+                           @RequestParam(value = "keptPhotos", required = false) List<String> keptPhotos,
+                           @RequestParam(value = "removePlanPhoto", required = false) boolean removePlanPhoto,
                            Authentication auth) {
         Long userId = getCurrentUserId(auth);
-        List<String> photoNames = fileStorageService.storeFiles(photos);
-        if (request.getPhotosUri() != null) photoNames.addAll(0, request.getPhotosUri());
-        request.setPhotosUri(photoNames);
-        if (planPhoto != null && !planPhoto.isEmpty()) {
-            List<String> planNames = fileStorageService.storeFiles(List.of(planPhoto));
-            if (!planNames.isEmpty()) request.setPlanPhotoUri(planNames.get(0));
+
+        // 1. Формируем итоговый список из отмеченных фотографий
+        List<String> finalPhotos = new ArrayList<>();
+        if (keptPhotos != null) {
+            finalPhotos.addAll(keptPhotos);
         }
+
+        // 2. Если редактирование - удаляем с диска неотмеченные фото
+        if (request.getId() != null) {
+            PlotDto.Response existingPlot = plotService.getPlotById(request.getId(), userId);
+            if (existingPlot.getPhotosUri() != null) {
+                List<String> photosToRemove = new ArrayList<>(existingPlot.getPhotosUri());
+                photosToRemove.removeAll(finalPhotos);
+                for (String removed : photosToRemove) {
+                    fileStorageService.deleteFile(removed);
+                }
+            }
+
+            // Обработка плана
+            if (removePlanPhoto && existingPlot.getPlanPhotoUri() != null) {
+                fileStorageService.deleteFile(existingPlot.getPlanPhotoUri());
+                request.setPlanPhotoUri(null);
+            } else if (!removePlanPhoto) {
+                request.setPlanPhotoUri(existingPlot.getPlanPhotoUri());
+            }
+        }
+
+        // 3. Добавляем новые загруженные фото
+        List<String> newPhotoNames = fileStorageService.storeFiles(photos);
+        finalPhotos.addAll(newPhotoNames);
+        request.setPhotosUri(finalPhotos);
+
+        // 4. Новый план участка
+        if (planPhoto != null && !planPhoto.isEmpty()) {
+            if (request.getId() != null && request.getPlanPhotoUri() != null) {
+                fileStorageService.deleteFile(request.getPlanPhotoUri());
+            }
+            List<String> planNames = fileStorageService.storeFiles(List.of(planPhoto));
+            if (!planNames.isEmpty()) {
+                request.setPlanPhotoUri(planNames.get(0));
+            }
+        }
+
         if (request.getId() != null) {
             plotService.updatePlot(request.getId(), request, userId);
         } else {

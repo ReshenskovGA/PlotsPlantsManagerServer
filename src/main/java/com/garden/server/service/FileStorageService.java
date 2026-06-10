@@ -2,6 +2,7 @@ package com.garden.server.service;
 
 import com.garden.server.config.FileStorageConfig;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
@@ -16,6 +17,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class FileStorageService {
     private final FileStorageConfig fileStorageConfig;
+    private Logger log;
 
     public List<String> storeFiles(List<MultipartFile> files) {
         List<String> savedFileNames = new ArrayList<>();
@@ -43,5 +45,18 @@ public class FileStorageService {
             throw new RuntimeException("Не удалось сохранить файлы: " + ex.getMessage());
         }
         return savedFileNames;
+    }
+    public void deleteFile(String fileName) {
+        if (fileName == null || fileName.isEmpty()) return;
+        try {
+            Path uploadDir = Paths.get(fileStorageConfig.getDir()).toAbsolutePath().normalize();
+            Path filePath = uploadDir.resolve(fileName).normalize();
+            // Проверка, что файл находится внутри директории uploads (безопасность)
+            if (filePath.startsWith(uploadDir)) {
+                Files.deleteIfExists(filePath);
+            }
+        } catch (IOException ex) {
+            log.warn("Не удалось удалить файл {}: {}", fileName, ex.getMessage());
+        }
     }
 }

@@ -36,11 +36,22 @@
         </div>
 
         <div style="margin-bottom: 1.5rem;">
-            <label>Фотографии</label>
-            <input type="file" name="photos" multiple accept="image/*" style="width: 100%; padding: 0.5rem;">
-            <small th:if="${plant.photosUri != null and !plant.photosUri.isEmpty()}" style="color: #666; display: block; margin-top: 0.5rem;">
-                Уже загружено фото: <span th:text="${plant.photosUri.size()} + ' шт.'"></span>
-            </small>
+            <label style="font-weight: bold; display: block; margin-bottom: 0.5rem;">Фотографии</label>
+
+            <!-- Существующие фотографии с возможностью удаления -->
+            <div th:if="${plant.photosUri != null and !plant.photosUri.isEmpty()}" style="display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem;">
+                <div th:each="photo : ${plant.photosUri}" style="position: relative; border: 1px solid #ddd; padding: 0.5rem; border-radius: 4px; background: #fafafa;">
+                    <img th:src="@{/uploads/{file}(file=${photo})}" style="width: 100px; height: 100px; object-fit: cover; display: block; margin-bottom: 0.5rem; border-radius: 4px;">
+                    <label style="display: flex; align-items: center; gap: 0.25rem; font-size: 0.85rem; cursor: pointer;">
+                        <input type="checkbox" name="keptPhotos" th:value="${photo}" checked style="width: auto; margin: 0;">
+                        Оставить
+                    </label>
+                </div>
+            </div>
+
+            <!-- Загрузка новых -->
+            <input type="file" name="photos" multiple accept="image/*" style="width: 100%; padding: 0.5rem; border: 1px dashed #ccc; border-radius: 4px;">
+            <small style="color: #666; display: block; margin-top: 0.25rem;">Снимите галочку с существующего фото, чтобы удалить его. Новые фото добавятся к оставленным.</small>
         </div>
 
         <div style="display: flex; gap: 1rem;">

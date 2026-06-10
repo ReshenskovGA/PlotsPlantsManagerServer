@@ -32,11 +32,13 @@
         <p th:text="${plant.description} ?: 'Описание отсутствует'" style="line-height: 1.6; margin: 0; white-space: pre-wrap;"></p>
     </div>
 
-    <div th:if="${plant.photosUri != null && !plant.photosUri.isEmpty()}" style="margin-bottom: 1.5rem;">
+    <div th:if="${plant.photosUri != null and !plant.photosUri.isEmpty()}" style="margin-bottom: 1.5rem;">
         <h3 style="margin-bottom: 0.5rem; color: #555;">Фотографии</h3>
         <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
-            <img th:each="photo : ${plant.photosUri}" th:src="@{/uploads/{file}(file=${photo})}"
-                 style="width: 150px; height: 150px; object-fit: cover; border-radius: 8px; border: 1px solid #eee;" />
+            <img th:each="photo : ${plant.photosUri}"
+                 th:src="@{/uploads/{file}(file=${photo})}"
+                 style="width: 150px; height: 150px; object-fit: cover; border-radius: 8px; border: 1px solid #eee; cursor: pointer;"
+                 onclick="window.open(this.src, '_blank')">
         </div>
     </div>
 
