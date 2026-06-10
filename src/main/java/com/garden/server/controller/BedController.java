@@ -21,35 +21,35 @@ public class BedController {
     @GetMapping("/plot/{plotId}")
     public ResponseEntity<List<BedDto.Response>> getBedsByPlot(
             @PathVariable Long plotId,
-            @AuthenticationPrincipal User currentUser) {
-        return ResponseEntity.ok(bedService.getBedsByPlot(plotId, currentUser.getId()));
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(bedService.getBedsByPlot(plotId, userDetails.getUser().getId()));
     }
 
     @PostMapping
     public ResponseEntity<BedDto.Response> createBed(
             @Valid @RequestBody BedDto.Request request,
-            @AuthenticationPrincipal User currentUser) {
-        return ResponseEntity.ok(bedService.createBed(request, currentUser.getId()));
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(bedService.createBed(request, userDetails.getUser().getId()));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<BedDto.Response> updateBed(
             @PathVariable Long id,
             @Valid @RequestBody BedDto.Request request,
-            @AuthenticationPrincipal User currentUser) {
-        return ResponseEntity.ok(bedService.updateBed(id, request, currentUser.getId()));
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(bedService.updateBed(id, request, userDetails.getUser().getId()));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteBed(
             @PathVariable Long id,
-            @AuthenticationPrincipal User currentUser) {
-        bedService.deleteBed(id, currentUser.getId());
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        bedService.deleteBed(id, userDetails.getUser().getId());
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping
-    public ResponseEntity<List<BedDto.Response>> getUserBeds(@AuthenticationPrincipal User currentUser) {
-        return ResponseEntity.ok(bedService.getBedsByUser(currentUser.getId()));
+    public ResponseEntity<List<BedDto.Response>> getUserBeds(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(bedService.getBedsByUser(userDetails.getUser().getId()));
     }
 }

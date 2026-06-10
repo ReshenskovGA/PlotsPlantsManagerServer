@@ -19,9 +19,9 @@ public class SyncController {
     @PostMapping("/process")
     public ResponseEntity<SyncDto.SyncResponse> processSync(
             @Valid @RequestBody SyncDto.SyncRequest request,
-            @AuthenticationPrincipal User currentUser) {
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
 
-        SyncDto.SyncResponse response = syncService.processSync(request, currentUser.getId());
+        SyncDto.SyncResponse response = syncService.processSync(request, userDetails.getUser().getId());
         return ResponseEntity.ok(response);
     }
 }

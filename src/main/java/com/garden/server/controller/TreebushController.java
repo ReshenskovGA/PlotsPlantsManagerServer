@@ -21,35 +21,35 @@ public class TreebushController {
     @GetMapping("/plot/{plotId}")
     public ResponseEntity<List<TreebushDto.Response>> getTreebushesByPlot(
             @PathVariable Long plotId,
-            @AuthenticationPrincipal User currentUser) {
-        return ResponseEntity.ok(treebushService.getTreebushByPlot(plotId, currentUser.getId()));
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(treebushService.getTreebushByPlot(plotId, userDetails.getUser().getId()));
     }
 
     @PostMapping
     public ResponseEntity<TreebushDto.Response> createTreebush(
             @Valid @RequestBody TreebushDto.Request request,
-            @AuthenticationPrincipal User currentUser) {
-        return ResponseEntity.ok(treebushService.createTreebush(request, currentUser.getId()));
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(treebushService.createTreebush(request, userDetails.getUser().getId()));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<TreebushDto.Response> updateTreebush(
             @PathVariable Long id,
             @Valid @RequestBody TreebushDto.Request request,
-            @AuthenticationPrincipal User currentUser) {
-        return ResponseEntity.ok(treebushService.updateTreebush(id, request, currentUser.getId()));
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(treebushService.updateTreebush(id, request, userDetails.getUser().getId()));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTreebush(
             @PathVariable Long id,
-            @AuthenticationPrincipal User currentUser) {
-        treebushService.deleteTreebush(id, currentUser.getId());
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        treebushService.deleteTreebush(id, userDetails.getUser().getId());
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping
-    public ResponseEntity<List<TreebushDto.Response>> getUserTreebushes(@AuthenticationPrincipal User currentUser) {
-        return ResponseEntity.ok(treebushService.getTreebushesByUser(currentUser.getId()));
+    public ResponseEntity<List<TreebushDto.Response>> getUserTreebushes(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(treebushService.getTreebushesByUser(userDetails.getUser().getId()));
     }
 }

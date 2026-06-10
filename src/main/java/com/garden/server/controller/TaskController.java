@@ -19,30 +19,30 @@ public class TaskController {
     private final TaskService taskService;
 
     @GetMapping
-    public ResponseEntity<List<TaskDto.Response>> getUserTasks(@AuthenticationPrincipal User currentUser) {
-        return ResponseEntity.ok(taskService.getTasksByUser(currentUser.getId()));
+    public ResponseEntity<List<TaskDto.Response>> getUserTasks(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(taskService.getTasksByUser(userDetails.getUser().getId()));
     }
 
     @PostMapping
     public ResponseEntity<TaskDto.Response> createTask(
             @Valid @RequestBody TaskDto.Request request,
-            @AuthenticationPrincipal User currentUser) {
-        return ResponseEntity.ok(taskService.createTask(request, currentUser.getId()));
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(taskService.createTask(request, userDetails.getUser().getId()));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<TaskDto.Response> updateTask(
             @PathVariable Long id,
             @Valid @RequestBody TaskDto.Request request,
-            @AuthenticationPrincipal User currentUser) {
-        return ResponseEntity.ok(taskService.updateTask(id, request, currentUser.getId()));
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(taskService.updateTask(id, request, userDetails.getUser().getId()));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTask(
             @PathVariable Long id,
-            @AuthenticationPrincipal User currentUser) {
-        taskService.deleteTask(id, currentUser.getId());
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        taskService.deleteTask(id, userDetails.getUser().getId());
         return ResponseEntity.noContent().build();
     }
 }

@@ -19,37 +19,37 @@ public class PlantController {
     private final PlantService plantService;
 
     @GetMapping
-    public ResponseEntity<List<PlantDto.Response>> getUserPlants(@AuthenticationPrincipal User currentUser) {
-        return ResponseEntity.ok(plantService.getPlantsByUser(currentUser.getId()));
+    public ResponseEntity<List<PlantDto.Response>> getUserPlants(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(plantService.getPlantsByUser(userDetails.getUser().getId()));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<PlantDto.Response> getPlantById(
             @PathVariable Long id,
-            @AuthenticationPrincipal User currentUser) {
-        return ResponseEntity.ok(plantService.getPlantById(id, currentUser.getId()));
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(plantService.getPlantById(id, userDetails.getUser().getId()));
     }
 
     @PostMapping
     public ResponseEntity<PlantDto.Response> createPlant(
             @Valid @RequestBody PlantDto.Request request,
-            @AuthenticationPrincipal User currentUser) {
-        return ResponseEntity.ok(plantService.createPlant(request, currentUser.getId()));
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(plantService.createPlant(request, userDetails.getUser().getId()));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<PlantDto.Response> updatePlant(
             @PathVariable Long id,
             @Valid @RequestBody PlantDto.Request request,
-            @AuthenticationPrincipal User currentUser) {
-        return ResponseEntity.ok(plantService.updatePlant(id, request, currentUser.getId()));
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(plantService.updatePlant(id, request, userDetails.getUser().getId()));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePlant(
             @PathVariable Long id,
-            @AuthenticationPrincipal User currentUser) {
-        plantService.deletePlant(id, currentUser.getId());
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        plantService.deletePlant(id, userDetails.getUser().getId());
         return ResponseEntity.noContent().build();
     }
 }

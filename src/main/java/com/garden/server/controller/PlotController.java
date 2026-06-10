@@ -19,30 +19,30 @@ public class PlotController {
     private final PlotService plotService;
 
     @GetMapping
-    public ResponseEntity<List<PlotDto.Response>> getUserPlots(@AuthenticationPrincipal User currentUser) {
-        return ResponseEntity.ok(plotService.getPlotsByUser(currentUser.getId()));
+    public ResponseEntity<List<PlotDto.Response>> getUserPlots(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(plotService.getPlotsByUser(@AuthenticationPrincipal CustomUserDetails userDetails));
     }
 
     @PostMapping
     public ResponseEntity<PlotDto.Response> createPlot(
             @Valid @RequestBody PlotDto.Request request,
-            @AuthenticationPrincipal User currentUser) {
-        return ResponseEntity.ok(plotService.createPlot(request, currentUser.getId()));
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(plotService.createPlot(request, @AuthenticationPrincipal CustomUserDetails userDetails));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<PlotDto.Response> updatePlot(
             @PathVariable Long id,
             @Valid @RequestBody PlotDto.Request request,
-            @AuthenticationPrincipal User currentUser) {
-        return ResponseEntity.ok(plotService.updatePlot(id, request, currentUser.getId()));
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(plotService.updatePlot(id, request, @AuthenticationPrincipal CustomUserDetails userDetails));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePlot(
             @PathVariable Long id,
-            @AuthenticationPrincipal User currentUser) {
-        plotService.deletePlot(id, currentUser.getId());
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        plotService.deletePlot(id, @AuthenticationPrincipal CustomUserDetails userDetails);
         return ResponseEntity.noContent().build();
     }
 }
