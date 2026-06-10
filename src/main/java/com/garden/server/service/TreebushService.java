@@ -115,4 +115,11 @@ public class TreebushService {
                 .markerColor(treebush.getMarkerColor())
                 .build();
     }
+
+    @Transactional(readOnly = true)
+    public List<TreebushDto.Response> getTreebushesByUser(Long userId) {
+        return treebushRepository.findByUserId(userId).stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
 }

@@ -118,4 +118,11 @@ public class BedService {
                 .markerColor(bed.getMarkerColor())
                 .build();
     }
+
+    @Transactional(readOnly = true)
+    public List<BedDto.Response> getBedsByUser(Long userId) {
+        return bedRepository.findByUserId(userId).stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
 }

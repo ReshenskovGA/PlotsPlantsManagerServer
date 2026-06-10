@@ -47,4 +47,9 @@ public class BedController {
         bedService.deleteBed(id, currentUser.getId());
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping
+    public ResponseEntity<List<BedDto.Response>> getUserBeds(@AuthenticationPrincipal User currentUser) {
+        return ResponseEntity.ok(bedService.getBedsByUser(currentUser.getId()));
+    }
 }

@@ -47,4 +47,9 @@ public class TreebushController {
         treebushService.deleteTreebush(id, currentUser.getId());
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping
+    public ResponseEntity<List<TreebushDto.Response>> getUserTreebushes(@AuthenticationPrincipal User currentUser) {
+        return ResponseEntity.ok(treebushService.getTreebushesByUser(currentUser.getId()));
+    }
 }
