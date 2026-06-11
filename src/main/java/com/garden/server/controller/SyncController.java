@@ -2,6 +2,7 @@ package com.garden.server.controller;
 
 import com.garden.server.dto.SyncDto;
 import com.garden.server.entity.User;
+import com.garden.server.security.CustomUserDetails;
 import com.garden.server.service.SyncService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

@@ -20,7 +20,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.ignoringRequestMatchers("/api/v1/**"))
+                .csrf(csrf -> csrf.ignoringRequestMatchers("/api/v1/**", "/web/login"))
                 .authorizeHttpRequests(auth -> auth
                         // Разрешаем доступ к главной странице, логину и статическим ресурсам
                         .requestMatchers("/", "/index.html", "/web/login", "/web/register", "/css/**", "/js/**", "/images/**", "/uploads/**").permitAll()
