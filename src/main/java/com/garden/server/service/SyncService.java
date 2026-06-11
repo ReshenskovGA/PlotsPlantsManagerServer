@@ -24,7 +24,6 @@ public class SyncService {
     private final TaskService taskService;
     private final PlantService plantService;
 
-    @Transactional
     public SyncDto.SyncResponse processSync(SyncDto.SyncRequest request, Long userId) {
         List<SyncDto.OperationResult> results = new ArrayList<>();
 
