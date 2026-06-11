@@ -93,4 +93,11 @@ public class PlotService {
                 .planPhotoUri(plot.getPlanPhotoUri())
                 .build();
     }
+
+    @Transactional(readOnly = true)
+    public boolean existsByIdAndUser(Long plotId, Long userId) {
+        return plotRepository.findById(plotId)
+                .map(plot -> plot.getUser().getId().equals(userId))
+                .orElse(false);
+    }
 }

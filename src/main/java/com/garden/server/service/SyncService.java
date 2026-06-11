@@ -63,28 +63,25 @@ public class SyncService {
         return SyncDto.SyncResponse.builder().results(results).build();
     }
 
-    private void handlePlantSync(SyncDto.OperationRequest op, Long userId, SyncDto.OperationResult result) throws Exception {
-        PlantDto.Request dto = objectMapper.readValue(op.getPayloadJson(), PlantDto.Request.class);
-
+    private void handleTaskSync(SyncDto.OperationRequest op, Long userId, SyncDto.OperationResult result) throws Exception {
+        TaskDto.Request dto = objectMapper.readValue(op.getPayloadJson(), TaskDto.Request.class);
         if (op.getOperationType() == OperationType.CREATE) {
-            PlantDto.Response saved = plantService.createPlant(dto, userId);
-            result.setServerId(saved.getId()); // Возвращаем новый ID, созданный на сервере
-        } else if (op.getOperationType() == OperationType.UPDATE) {
-            plantService.updatePlant(op.getEntityId(), dto, userId);
-        } else if (op.getOperationType() == OperationType.DELETE) {
-            plantService.deletePlant(op.getEntityId(), userId);
-        }
-    }
-
-    private void handleTreebushSync(SyncDto.OperationRequest op, Long userId, SyncDto.OperationResult result) throws Exception {
-        TreebushDto.Request dto = objectMapper.readValue(op.getPayloadJson(), TreebushDto.Request.class);
-        if (op.getOperationType() == OperationType.CREATE) {
-            TreebushDto.Response saved = treebushService.createTreebush(dto, userId);
+            TaskDto.Response saved = taskService.createTask(dto, userId);
             result.setServerId(saved.getId());
         } else if (op.getOperationType() == OperationType.UPDATE) {
-            treebushService.updateTreebush(op.getEntityId(), dto, userId);
+            if (taskService.existsByIdAndUser(op.getEntityId(), userId)) {
+                taskService.updateTask(op.getEntityId(), dto, userId);
+            } else {
+                result.setStatus(SyncStatus.FAILED);
+                result.setErrorMessage("Задача не существует");
+            }
         } else if (op.getOperationType() == OperationType.DELETE) {
-            treebushService.deleteTreebush(op.getEntityId(), userId);
+            if (taskService.existsByIdAndUser(op.getEntityId(), userId)) {
+                taskService.deleteTask(op.getEntityId(), userId);
+            } else {
+                // Задача уже удалена — считаем операцию успешной
+                result.setStatus(SyncStatus.SYNCED);
+            }
         }
     }
 
@@ -94,9 +91,18 @@ public class SyncService {
             PlotDto.Response saved = plotService.createPlot(dto, userId);
             result.setServerId(saved.getId());
         } else if (op.getOperationType() == OperationType.UPDATE) {
-            plotService.updatePlot(op.getEntityId(), dto, userId);
+            if (plotService.existsByIdAndUser(op.getEntityId(), userId)) {
+                plotService.updatePlot(op.getEntityId(), dto, userId);
+            } else {
+                result.setStatus(SyncStatus.FAILED);
+                result.setErrorMessage("Участок не существует");
+            }
         } else if (op.getOperationType() == OperationType.DELETE) {
-            plotService.deletePlot(op.getEntityId(), userId);
+            if (plotService.existsByIdAndUser(op.getEntityId(), userId)) {
+                plotService.deletePlot(op.getEntityId(), userId);
+            } else {
+                result.setStatus(SyncStatus.SYNCED);
+            }
         }
     }
 
@@ -106,21 +112,60 @@ public class SyncService {
             BedDto.Response saved = bedService.createBed(dto, userId);
             result.setServerId(saved.getId());
         } else if (op.getOperationType() == OperationType.UPDATE) {
-            bedService.updateBed(op.getEntityId(), dto, userId);
+            if (bedService.existsByIdAndUser(op.getEntityId(), userId)) {
+                bedService.updateBed(op.getEntityId(), dto, userId);
+            } else {
+                result.setStatus(SyncStatus.FAILED);
+                result.setErrorMessage("Грядка не существует");
+            }
         } else if (op.getOperationType() == OperationType.DELETE) {
-            bedService.deleteBed(op.getEntityId(), userId);
+            if (bedService.existsByIdAndUser(op.getEntityId(), userId)) {
+                bedService.deleteBed(op.getEntityId(), userId);
+            } else {
+                result.setStatus(SyncStatus.SYNCED);
+            }
         }
     }
 
-    private void handleTaskSync(SyncDto.OperationRequest op, Long userId, SyncDto.OperationResult result) throws Exception {
-        TaskDto.Request dto = objectMapper.readValue(op.getPayloadJson(), TaskDto.Request.class);
+    private void handleTreebushSync(SyncDto.OperationRequest op, Long userId, SyncDto.OperationResult result) throws Exception {
+        TreebushDto.Request dto = objectMapper.readValue(op.getPayloadJson(), TreebushDto.Request.class);
         if (op.getOperationType() == OperationType.CREATE) {
-            TaskDto.Response saved = taskService.createTask(dto, userId);
+            TreebushDto.Response saved = treebushService.createTreebush(dto, userId);
             result.setServerId(saved.getId());
         } else if (op.getOperationType() == OperationType.UPDATE) {
-            taskService.updateTask(op.getEntityId(), dto, userId);
+            if (treebushService.existsByIdAndUser(op.getEntityId(), userId)) {
+                treebushService.updateTreebush(op.getEntityId(), dto, userId);
+            } else {
+                result.setStatus(SyncStatus.FAILED);
+                result.setErrorMessage("Дерево/куст не существует");
+            }
         } else if (op.getOperationType() == OperationType.DELETE) {
-            taskService.deleteTask(op.getEntityId(), userId);
+            if (treebushService.existsByIdAndUser(op.getEntityId(), userId)) {
+                treebushService.deleteTreebush(op.getEntityId(), userId);
+            } else {
+                result.setStatus(SyncStatus.SYNCED);
+            }
+        }
+    }
+
+    private void handlePlantSync(SyncDto.OperationRequest op, Long userId, SyncDto.OperationResult result) throws Exception {
+        PlantDto.Request dto = objectMapper.readValue(op.getPayloadJson(), PlantDto.Request.class);
+        if (op.getOperationType() == OperationType.CREATE) {
+            PlantDto.Response saved = plantService.createPlant(dto, userId);
+            result.setServerId(saved.getId());
+        } else if (op.getOperationType() == OperationType.UPDATE) {
+            if (plantService.existsByIdAndUser(op.getEntityId(), userId)) {
+                plantService.updatePlant(op.getEntityId(), dto, userId);
+            } else {
+                result.setStatus(SyncStatus.FAILED);
+                result.setErrorMessage("Растение не существует");
+            }
+        } else if (op.getOperationType() == OperationType.DELETE) {
+            if (plantService.existsByIdAndUser(op.getEntityId(), userId)) {
+                plantService.deletePlant(op.getEntityId(), userId);
+            } else {
+                result.setStatus(SyncStatus.SYNCED);
+            }
         }
     }
 }

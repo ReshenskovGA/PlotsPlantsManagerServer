@@ -125,4 +125,10 @@ public class TaskService {
                 .plantedItemType(task.getPlantedItemType())
                 .build();
     }
+    @Transactional(readOnly = true)
+    public boolean existsByIdAndUser(Long taskId, Long userId) {
+        return taskRepository.findById(taskId)
+                .map(task -> task.getUser().getId().equals(userId))
+                .orElse(false);
+    }
 }

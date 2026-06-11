@@ -122,4 +122,11 @@ public class TreebushService {
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
+
+    @Transactional(readOnly = true)
+    public boolean existsByIdAndUser(Long treebushId, Long userId) {
+        return treebushRepository.findById(treebushId)
+                .map(treebush -> treebush.getUser().getId().equals(userId))
+                .orElse(false);
+    }
 }

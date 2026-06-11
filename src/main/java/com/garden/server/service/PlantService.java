@@ -110,4 +110,11 @@ public class PlantService {
                 .photosUri(plant.getPhotosUri())
                 .build();
     }
+
+    @Transactional(readOnly = true)
+    public boolean existsByIdAndUser(Long plantId, Long userId) {
+        return plantRepository.findById(plantId)
+                .map(plant -> plant.getUser().getId().equals(userId))
+                .orElse(false);
+    }
 }

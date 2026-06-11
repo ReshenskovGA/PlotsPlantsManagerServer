@@ -125,4 +125,11 @@ public class BedService {
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
+
+    @Transactional(readOnly = true)
+    public boolean existsByIdAndUser(Long bedId, Long userId) {
+        return bedRepository.findById(bedId)
+                .map(bed -> bed.getUser().getId().equals(userId))
+                .orElse(false);
+    }
 }
