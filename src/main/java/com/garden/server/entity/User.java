@@ -10,7 +10,6 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class User {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -19,11 +18,14 @@ public class User {
     private String login;
 
     @Column(nullable = false)
-    private String password; // Хранить только BCrypt хеш!
+    private String password;
 
     @Column(length = 100)
     private String email;
 
     @Column(length = 100)
     private String username;
+
+    @Column(nullable = false, length = 20)
+    private String role = "USER"; // USER или MODERATOR
 }

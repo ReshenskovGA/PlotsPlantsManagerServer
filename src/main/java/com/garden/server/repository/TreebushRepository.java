@@ -7,6 +7,7 @@ import java.util.List;
 
 @Repository
 public interface TreebushRepository extends JpaRepository<Treebush, Long> {
+    long countByUserId(Long userId);
 
     List<Treebush> findByPlotId(Long plotId);
 

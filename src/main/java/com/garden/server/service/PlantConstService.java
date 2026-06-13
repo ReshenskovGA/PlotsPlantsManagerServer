@@ -38,4 +38,30 @@ public class PlantConstService {
                 .photosUri(plant.getPhotosUri())
                 .build();
     }
+    @Transactional
+    public PlantDto.ConstResponse createPlantConst(PlantDto.Request request) {
+        PlantConst plant = PlantConst.builder()
+                .name(request.getName())
+                .description(request.getDescription())
+                .categories(request.getCategories())
+                .photosUri(request.getPhotosUri())
+                .build();
+        return mapToResponse(plantConstRepository.save(plant));
+    }
+
+    @Transactional
+    public PlantDto.ConstResponse updatePlantConst(Long id, PlantDto.Request request) {
+        PlantConst plant = plantConstRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Растение справочника не найдено"));
+        plant.setName(request.getName());
+        plant.setDescription(request.getDescription());
+        plant.setCategories(request.getCategories());
+        plant.setPhotosUri(request.getPhotosUri());
+        return mapToResponse(plantConstRepository.save(plant));
+    }
+
+    @Transactional
+    public void deletePlantConst(Long id) {
+        plantConstRepository.deleteById(id);
+    }
 }

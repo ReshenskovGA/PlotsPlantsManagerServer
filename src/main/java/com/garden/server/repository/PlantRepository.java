@@ -7,6 +7,7 @@ import java.util.List;
 
 @Repository
 public interface PlantRepository extends JpaRepository<Plant, Long> {
+    long countByUserId(Long userId);
 
     List<Plant> findByNameContainingIgnoreCase(String name);
 

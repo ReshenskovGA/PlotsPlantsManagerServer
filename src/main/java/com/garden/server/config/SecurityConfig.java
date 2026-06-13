@@ -27,6 +27,8 @@ public class SecurityConfig {
                         // Публичные REST API
                         .requestMatchers("/api/v1/auth/**", "/api/v1/plants-const/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
+
+                        .requestMatchers("/web/moderator/**").hasRole("MODERATOR")
                         // Веб-страницы и REST API требуют авторизации
                         .requestMatchers("/web/**").authenticated()
                         .requestMatchers("/api/v1/**").authenticated()

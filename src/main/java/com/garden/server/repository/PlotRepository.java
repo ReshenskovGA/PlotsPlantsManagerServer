@@ -7,6 +7,7 @@ import java.util.List;
 
 @Repository
 public interface PlotRepository extends JpaRepository<Plot, Long> {
+    long countByUserId(Long userId);
 
     List<Plot> findByUserId(Long userId);
 }
