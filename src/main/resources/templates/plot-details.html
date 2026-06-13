@@ -21,6 +21,7 @@
         <p th:if="${plot.cadastralNumber}" style="margin: 0.5rem 0;"><strong>Кадастровый номер:</strong> <span th:text="${plot.cadastralNumber}"></span></p>
     </div>
 
+    <!-- Фотографии участка -->
     <div th:if="${plot.photosUri != null and !plot.photosUri.isEmpty()}" style="background: #fff; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 2rem;">
         <h2 style="margin: 0 0 1rem 0; color: #555;">Фотографии участка</h2>
         <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
@@ -28,13 +29,74 @@
                  th:src="@{/uploads/{file}(file=${photo})}"
                  style="width: 150px; height: 150px; object-fit: cover; border-radius: 8px; border: 1px solid #eee; cursor: pointer;"
                  onclick="window.open(this.src, '_blank')">
-            0</div>
+        </div>
     </div>
 
+    <!-- План участка -->
     <div th:if="${plot.planPhotoUri != null and !plot.planPhotoUri.isEmpty()}" style="background: #fff; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 2rem;">
         <h2 style="margin: 0 0 1rem 0; color: #555;">План участка</h2>
         <img th:src="@{/uploads/{file}(file=${plot.planPhotoUri})}"
              style="max-width: 100%; height: auto; border-radius: 8px; border: 1px solid #eee;">
+    </div>
+
+    <!-- Схема участка -->
+    <div th:if="${plot.width != null and plot.length != null}" style="background: #fff; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 2rem;">
+        <h2 style="margin: 0 0 1.5rem 0; color: #555;">Схема участка</h2>
+
+        <!-- Контейнер схемы с сохранением пропорций -->
+        <div th:style="'position: relative; width: 100%; max-width: 800px; margin: 0 auto; aspect-ratio: ' + ${plot.width} + ' / ' + ${plot.length} + '; background: #f9fbf9; border: 2px solid #333; border-radius: 4px; overflow: visible;'" >
+
+            <!-- Грядки (позиционируются от верхнего левого угла) -->
+            <th:block th:each="bed : ${beds}">
+                <div th:style="'position: absolute; ' +
+                           'left: ' + (${bed.offsetX} * 100.0 / ${plot.width}) + '%; ' +
+                           'top: ' + (${bed.offsetY} * 100.0 / ${plot.length}) + '%; ' +
+                           'width: ' + (${bed.width} * 100.0 / ${plot.width}) + '%; ' +
+                           'height: ' + (${bed.length} * 100.0 / ${plot.length}) + '%; ' +
+                           'background-color: ' + ${bedColors[bed.id]} + '; ' +
+                           'border: 1px solid #333; ' +
+                           'border-radius: 4px; ' +
+                           'cursor: pointer; transition: transform 0.2s; overflow: visible;'"
+                     th:title="${plantNames[bed.plantId]} + ' (' + ${bed.length} + ' x ' + ${bed.width} + ' м)'"
+                     onmouseover="this.style.transform='scale(1.05)'; this.style.zIndex='10';"
+                     onmouseout="this.style.transform='scale(1)'; this.style.zIndex='1';">
+
+                    <!-- Подпись ПОД грядкой -->
+                    <div style="position: absolute; top: 100%; left: 50%; transform: translateX(-50%); white-space: nowrap; background: rgba(255,255,255,0.95); padding: 2px 6px; border-radius: 3px; font-size: 0.75rem; margin-top: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.2); text-align: center; pointer-events: none; z-index: 5;">
+                        <div style="font-weight: bold; color: #333; line-height: 1.2;" th:text="${plantNames[bed.plantId]} ?: 'Грядка'">Растение</div>
+                        <div style="color: #555; font-size: 0.7rem;" th:text="${bed.width} + 'x' + ${bed.length} + 'м'">Размер</div>
+                    </div>
+                </div>
+            </th:block>
+
+            <!-- Деревья и кусты (позиционируются по ЦЕНТРУ благодаря translate(-50%, -50%)) -->
+            <th:block th:each="tree : ${trees}">
+                <div th:style="'position: absolute; ' +
+                           'left: ' + (${tree.offsetX} * 100.0 / ${plot.width}) + '%; ' +
+                           'top: ' + (${tree.offsetY} * 100.0 / ${plot.length}) + '%; ' +
+                           'width: ' + (${tree.diameter} * 100.0 / ${plot.width}) + '%; ' +
+                           'aspect-ratio: 1 / 1; ' +
+                           'background-color: ' + ${treeColors[tree.id]} + '; ' +
+                           'border: 1px solid #333; ' +
+                           'border-radius: 50%; ' +
+                           'cursor: pointer; transition: transform 0.2s; ' +
+                           'transform: translate(-50%, -50%); overflow: visible;'"
+                     th:title="${plantNames[tree.plantId]} + ' (Диаметр: ' + ${tree.diameter} + ' м)'"
+                     onmouseover="this.style.transform='translate(-50%, -50%) scale(1.05)'; this.style.zIndex='10';"
+                     onmouseout="this.style.transform='translate(-50%, -50%) scale(1)'; this.style.zIndex='1';">
+
+                    <!-- Подпись ПОД деревом/кустом -->
+                    <div style="position: absolute; top: 100%; left: 50%; transform: translateX(-50%); white-space: nowrap; background: rgba(255,255,255,0.95); padding: 2px 6px; border-radius: 3px; font-size: 0.75rem; margin-top: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.2); text-align: center; pointer-events: none; z-index: 5;">
+                        <div style="font-weight: bold; color: #333; line-height: 1.2;" th:text="${plantNames[tree.plantId]} ?: 'Дерево/Куст'">Растение</div>
+                        <div style="color: #555; font-size: 0.7rem;" th:text="'d=' + ${tree.diameter} + 'м'">Размер</div>
+                    </div>
+                </div>
+            </th:block>
+
+        </div>
+        <div style="text-align: center; color: #666; font-size: 0.9rem; margin-top: 1rem;">
+            Размеры участка: <span th:text="${plot.width}"></span> м (ширина) × <span th:text="${plot.length}"></span> м (длина)
+        </div>
     </div>
 
     <!-- Блок ГРЯДКИ -->
@@ -116,6 +178,7 @@
         </div>
         <p th:if="${trees.isEmpty()}" style="color: #777; text-align: center; padding: 1rem; margin: 0;">На этом участке пока нет деревьев или кустов.</p>
     </div>
+
 </main>
 <div th:replace="~{layout :: footer}"></div>
 </body>
