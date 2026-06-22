@@ -25,7 +25,7 @@ public class SyncDto {
         private OperationType operationType;
 
         @NotNull(message = "Payload (данные) обязателен")
-        private String payloadJson; // JSON-строка с данными сущности от клиента
+        private String payloadJson;
     }
 
     @Data
@@ -45,9 +45,9 @@ public class SyncDto {
         private Long entityId;
         private EntityType entityType;
         private OperationType operationType;
-        private SyncStatus status; // SYNCED, FAILED, CONFLICT
-        private String errorMessage; // Если статус FAILED или CONFLICT
-        private Long serverId; // Если на сервере был создан новый ID (например, при OperationType.CREATE)
+        private SyncStatus status;
+        private String errorMessage;
+        private Long serverId;
     }
 
     @Data

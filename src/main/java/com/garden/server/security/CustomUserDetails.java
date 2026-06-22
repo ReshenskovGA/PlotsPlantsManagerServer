@@ -19,7 +19,6 @@ public class CustomUserDetails implements UserDetails, Serializable {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        // Формируем роль с префиксом ROLE_
         return List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole()));
     }
 

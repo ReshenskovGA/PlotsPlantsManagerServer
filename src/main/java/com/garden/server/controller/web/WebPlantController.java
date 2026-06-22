@@ -48,7 +48,6 @@ public class WebPlantController {
             "Лиственное", "Суккулент", "Комнатное растение", "Лекарственное"
     );
 
-    // Внутренний класс для объединения данных из справочника и личных растений
     @Data
     @AllArgsConstructor
     public static class PlantListItem {
@@ -69,27 +68,21 @@ public class WebPlantController {
         Long userId = getCurrentUserId(auth);
         List<PlantListItem> items = new ArrayList<>();
 
-        // Добавляем растения из справочника
         for (PlantDto.ConstResponse p : plantConstService.getAllPlants()) {
             items.add(new PlantListItem(p.getId(), p.getName(), p.getDescription(), p.getCategories(), p.getPhotosUri(), true));
         }
-        // Добавляем личные растения
         for (PlantDto.Response p : plantService.getPlantsByUser(userId)) {
             items.add(new PlantListItem(p.getId(), p.getName(), p.getDescription(), p.getCategories(), p.getPhotosUri(), false));
         }
 
-        // Фильтрация по поиску
         if (search != null && !search.trim().isEmpty()) {
             String lowerSearch = search.toLowerCase();
             items.removeIf(p -> !p.getName().toLowerCase().contains(lowerSearch));
         }
-        // Фильтрация по источнику
         if (source != null && !source.equals("all")) {
             boolean isCatalog = source.equals("catalog");
-            // ИСПРАВЛЕНИЕ: используем getCatalog() вместо isCatalog()
             items.removeIf(p -> p.getCatalog() != isCatalog);
         }
-        // Фильтрация по категориям
         if (categories != null && !categories.isEmpty()) {
             items.removeIf(p -> p.getCategories() == null ||
                     p.getCategories().stream().noneMatch(categories::contains));
@@ -103,7 +96,6 @@ public class WebPlantController {
         return "plants";
     }
 
-    // Просмотр детальной информации о растении
     @GetMapping("/view/{id}")
     public String viewPlant(@PathVariable Long id, @RequestParam String source, Model model) {
         PlantListItem item;
@@ -148,7 +140,6 @@ public class WebPlantController {
             finalPhotos.addAll(keptPhotos);
         }
 
-        // Удаляем с диска фотографии, которые пользователь снял с галочки
         if (request.getId() != null) {
             PlantDto.Response existingPlant = plantService.getPlantById(request.getId(), userId);
             if (existingPlant.getPhotosUri() != null) {
@@ -160,7 +151,6 @@ public class WebPlantController {
             }
         }
 
-        // Добавляем новые загруженные фотографии
         List<String> newPhotoNames = fileStorageService.storeFiles(photos);
         finalPhotos.addAll(newPhotoNames);
         request.setPhotosUri(finalPhotos);

@@ -78,7 +78,6 @@ public class SyncService {
             if (taskService.existsByIdAndUser(op.getEntityId(), userId)) {
                 taskService.deleteTask(op.getEntityId(), userId);
             } else {
-                // Задача уже удалена — считаем операцию успешной
                 result.setStatus(SyncStatus.SYNCED);
             }
         }

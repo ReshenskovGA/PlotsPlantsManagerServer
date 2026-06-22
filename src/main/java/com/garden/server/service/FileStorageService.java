@@ -51,7 +51,6 @@ public class FileStorageService {
         try {
             Path uploadDir = Paths.get(fileStorageConfig.getDir()).toAbsolutePath().normalize();
             Path filePath = uploadDir.resolve(fileName).normalize();
-            // Проверка, что файл находится внутри директории uploads (безопасность)
             if (filePath.startsWith(uploadDir)) {
                 Files.deleteIfExists(filePath);
             }

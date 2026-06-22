@@ -55,7 +55,6 @@ public class TaskService {
                 .collect(Collectors.toList());
     }
 
-    // НОВЫЙ МЕТОД: Получение задачи по ID с проверкой прав
     @Transactional(readOnly = true)
     public TaskDto.Response getTaskById(Long taskId, Long userId) {
         Task task = taskRepository.findById(taskId)
@@ -74,7 +73,6 @@ public class TaskService {
             throw new SecurityException("Доступ запрещен");
         }
 
-        // Безопасная обработка смены или удаления участка
         if (request.getPlotId() != null) {
             if (task.getPlot() == null || !task.getPlot().getId().equals(request.getPlotId())) {
                 Plot newPlot = plotRepository.findById(request.getPlotId())
@@ -85,7 +83,7 @@ public class TaskService {
                 task.setPlot(newPlot);
             }
         } else {
-            task.setPlot(null); // Разрешаем отвязать задачу от участка
+            task.setPlot(null);
         }
 
         task.setTitle(request.getTitle());

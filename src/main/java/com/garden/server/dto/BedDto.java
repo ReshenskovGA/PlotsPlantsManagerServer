@@ -11,7 +11,7 @@ public class BedDto {
     @AllArgsConstructor
     @Builder
     public static class Request {
-        private Long id; // Добавлено для редактирования
+        private Long id;
         @NotNull(message = "ID участка обязателен")
         private Long plotId;
         private Long plantId;

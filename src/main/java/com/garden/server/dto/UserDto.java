@@ -48,7 +48,6 @@ public class UserDto {
         private String login;
         private String email;
         private String username;
-        // Поле password намеренно отсутствует для безопасности
     }
 
     @Data
@@ -56,7 +55,7 @@ public class UserDto {
     @AllArgsConstructor
     @Builder
     public static class AuthResponse {
-        private String token; // JWT токен
+        private String token;
         private Response user;
     }
 }

@@ -78,13 +78,11 @@ public class ModeratorController {
                             @RequestParam(value = "photos", required = false) List<MultipartFile> photos,
                             @RequestParam(value = "keptPhotos", required = false) List<String> keptPhotos) {
 
-        // 1. Собираем итоговый список фото: те, что остались отмеченными
         List<String> finalPhotos = new ArrayList<>();
         if (keptPhotos != null) {
             finalPhotos.addAll(keptPhotos);
         }
 
-        // 2. При редактировании — удаляем с диска те фото, которые сняли с галочки
         if (plantId != null) {
             PlantDto.ConstResponse existing = plantConstService.getAllPlants().stream()
                     .filter(p -> p.getId().equals(plantId))
@@ -99,7 +97,6 @@ public class ModeratorController {
             }
         }
 
-        // 3. Сохраняем новые загруженные фото
         if (photos != null && !photos.isEmpty()) {
             List<String> newNames = fileStorageService.storeFiles(photos);
             finalPhotos.addAll(newNames);

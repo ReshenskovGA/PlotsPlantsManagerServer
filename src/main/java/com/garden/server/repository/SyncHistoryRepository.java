@@ -13,13 +13,10 @@ import java.util.List;
 @Repository
 public interface SyncHistoryRepository extends JpaRepository<SyncHistory, Long> {
 
-    // Получение всех неподтвержденных записей, отсортированных по времени создания (FIFO)
     List<SyncHistory> findBySyncStatusOrderByCreatedAtAsc(SyncStatus status);
 
-    // Получение записей конкретного типа (например, только PLOT) со статусом PENDING
     List<SyncHistory> findByEntityTypeAndSyncStatus(EntityType entityType, SyncStatus status);
 
-    // Массовое удаление успешно синхронизированных записей для очистки таблицы
     @Modifying
     @Transactional
     @Query("DELETE FROM SyncHistory s WHERE s.syncStatus = :status")

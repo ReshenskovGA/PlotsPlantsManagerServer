@@ -69,7 +69,6 @@ public class WebPlotController {
         List<BedDto.Response> beds = bedService.getBedsByPlot(id, userId);
         List<TreebushDto.Response> trees = treebushService.getTreebushByPlot(id, userId);
 
-        // Собираем ID всех растений для получения их названий
         Set<Long> plantIds = new HashSet<>();
         beds.forEach(b -> { if (b.getPlantId() != null) plantIds.add(b.getPlantId()); });
         trees.forEach(t -> { if (t.getPlantId() != null) plantIds.add(t.getPlantId()); });
@@ -83,7 +82,6 @@ public class WebPlotController {
             }
         }
 
-        // === НОВОЕ: Мапы HEX-цветов для каждого объекта ===
         Map<Long, String> bedColors = new HashMap<>();
         beds.forEach(b -> bedColors.put(b.getId(), intToHexColor(b.getMarkerColor())));
 
@@ -122,13 +120,11 @@ public class WebPlotController {
                            Authentication auth) {
         Long userId = getCurrentUserId(auth);
 
-        // 1. Формируем итоговый список из отмеченных фотографий
         List<String> finalPhotos = new ArrayList<>();
         if (keptPhotos != null) {
             finalPhotos.addAll(keptPhotos);
         }
 
-        // 2. Если редактирование - удаляем с диска неотмеченные фото
         if (request.getId() != null) {
             PlotDto.Response existingPlot = plotService.getPlotById(request.getId(), userId);
             if (existingPlot.getPhotosUri() != null) {
@@ -139,7 +135,6 @@ public class WebPlotController {
                 }
             }
 
-            // Обработка плана
             if (removePlanPhoto && existingPlot.getPlanPhotoUri() != null) {
                 fileStorageService.deleteFile(existingPlot.getPlanPhotoUri());
                 request.setPlanPhotoUri(null);
@@ -148,12 +143,10 @@ public class WebPlotController {
             }
         }
 
-        // 3. Добавляем новые загруженные фото
         List<String> newPhotoNames = fileStorageService.storeFiles(photos);
         finalPhotos.addAll(newPhotoNames);
         request.setPhotosUri(finalPhotos);
 
-        // 4. Новый план участка
         if (planPhoto != null && !planPhoto.isEmpty()) {
             if (request.getId() != null && request.getPlanPhotoUri() != null) {
                 fileStorageService.deleteFile(request.getPlanPhotoUri());

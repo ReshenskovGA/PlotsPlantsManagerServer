@@ -41,7 +41,6 @@ public class WebGardenItemController {
     private final TaskService taskService;
     private final RecurrenceUtils recurrenceUtils;
 
-    // === ИСПРАВЛЕНИЕ: считываем context-path из конфигурации ===
     @Value("${server.servlet.context-path:}")
     private String contextPath;
 
@@ -73,7 +72,6 @@ public class WebGardenItemController {
         return options;
     }
 
-    // === ИСПРАВЛЕНИЕ: добавляем contextPath к URL ===
     private String getBackUrl(String from, Long plotId) {
         if ("list".equals(from)) {
             return contextPath + "/web/items";
@@ -81,7 +79,6 @@ public class WebGardenItemController {
         return contextPath + "/web/plots/" + plotId;
     }
 
-    // === НОВОЕ: генерация URL для просмотра растения ===
     private String getPlantViewUrl(Long plantId) {
         if (plantId == null) return null;
         if (plantId < 0) {
@@ -103,7 +100,6 @@ public class WebGardenItemController {
         private String name;
     }
 
-    // ==================== ГРЯДКИ ====================
 
     @GetMapping("/bed/add")
     public String showAddBedForm(@RequestParam Long plotId,
@@ -172,7 +168,7 @@ public class WebGardenItemController {
         model.addAttribute("colorHex", intToHexColor(bed.getMarkerColor()));
         model.addAttribute("from", from);
         model.addAttribute("backUrl", getBackUrl(from, bed.getPlotId()));
-        // === НОВОЕ: URL для перехода к растению ===
+
         model.addAttribute("plantViewUrl", getPlantViewUrl(bed.getPlantId()));
 
         List<TaskDto.Response> allTasks = taskService.getTasksByUser(userId);
@@ -190,7 +186,6 @@ public class WebGardenItemController {
         return "garden-item-view";
     }
 
-    // ==================== ДЕРЕВЬЯ / КУСТЫ ====================
 
     @GetMapping("/treebush/add")
     public String showAddTreebushForm(@RequestParam Long plotId,
@@ -259,7 +254,7 @@ public class WebGardenItemController {
         model.addAttribute("colorHex", intToHexColor(tree.getMarkerColor()));
         model.addAttribute("from", from);
         model.addAttribute("backUrl", getBackUrl(from, tree.getPlotId()));
-        // === НОВОЕ: URL для перехода к растению ===
+
         model.addAttribute("plantViewUrl", getPlantViewUrl(tree.getPlantId()));
 
         List<TaskDto.Response> allTasks = taskService.getTasksByUser(userId);

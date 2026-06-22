@@ -14,7 +14,6 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    // private final JwtTokenProvider jwtTokenProvider; // Раскомментируйте при реализации JWT
 
     @Transactional
     public UserDto.Response register(UserDto.RegisterRequest request) {
@@ -42,8 +41,7 @@ public class UserService {
             throw new IllegalArgumentException("Неверный логин или пароль");
         }
 
-        // String token = jwtTokenProvider.generateToken(user.getLogin());
-        String token = "mock-jwt-token-for-development"; // Заглушка до реализации JWT
+        String token = "mock-jwt-token-for-development";
 
         return UserDto.AuthResponse.builder()
                 .token(token)

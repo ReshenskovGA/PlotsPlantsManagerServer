@@ -9,8 +9,5 @@ import java.util.List;
 public interface PlantConstRepository extends JpaRepository<PlantConst, Long> {
 
     List<PlantConst> findByNameContainingIgnoreCase(String name);
-
-    // Поиск по категории (учитывая, что categories хранится в отдельной таблице через @ElementCollection,
-    // Spring Data JPA корректно обработает этот запрос, но для больших объемов данных лучше использовать @Query с JOIN)
     List<PlantConst> findByCategoriesContaining(String category);
 }

@@ -28,14 +28,12 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // Получаем абсолютный путь к директории загрузок
         String uploadDir = Paths.get(fileStorageConfig.getDir())
                 .toAbsolutePath()
                 .normalize()
                 .toUri()
                 .toString();
 
-        // Убеждаемся, что путь заканчивается на /
         if (!uploadDir.endsWith("/")) {
             uploadDir += "/";
         }

@@ -74,7 +74,6 @@ public class TreebushService {
             throw new SecurityException("Доступ запрещен");
         }
 
-        // При обновлении участка проверяем, что новый участок тоже принадлежит пользователю
         if (!treebush.getPlot().getId().equals(request.getPlotId())) {
             Plot newPlot = plotRepository.findById(request.getPlotId())
                     .orElseThrow(() -> new IllegalArgumentException("Новый участок не найден"));

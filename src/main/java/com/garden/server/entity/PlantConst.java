@@ -5,7 +5,7 @@ import lombok.*;
 import java.util.List;
 
 @Entity
-@Table(name = "plants_const") // Справочник растений
+@Table(name = "plants_const")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

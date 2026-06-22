@@ -27,5 +27,5 @@ public class User {
     private String username;
 
     @Column(nullable = false, length = 20)
-    private String role = "USER"; // USER или MODERATOR
+    private String role = "USER";
 }

@@ -21,7 +21,7 @@ public class TaskDto {
         private String description;
 
         @NotNull(message = "Дата выполнения обязательна")
-        private Long date; // Timestamp в миллисекундах, как в клиенте
+        private Long date;
 
         @NotNull(message = "Статус выполнения обязателен")
         private Boolean isCompleted;

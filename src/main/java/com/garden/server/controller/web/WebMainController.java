@@ -80,7 +80,6 @@ public class WebMainController {
         return names;
     }
 
-    // Обновите внутренний класс DashboardTask
     @Data
     @AllArgsConstructor
     public static class DashboardTask {
@@ -106,7 +105,6 @@ public class WebMainController {
 
         List<TaskDto.Response> allTasks = taskService.getTasksByUser(userId);
 
-        // === Подсчёт объектов сада и посаженных растений ===
         int gardenItemsCount = 0;
         Set<Long> plantedPlantIds = new HashSet<>();
         for (PlotDto.Response plot : plots) {
@@ -128,19 +126,16 @@ public class WebMainController {
         model.addAttribute("gardenItemsCount", gardenItemsCount);
         model.addAttribute("plantedPlantsCount", plantedPlantIds.size());
 
-        // === Счётчик задач (все развёрнутые) ===
         LocalDate now = LocalDate.now();
         List<TaskDto.Response> expandedTasks = recurrenceUtils.expandTasks(
                 allTasks, now.minusMonths(1), now.plusMonths(1));
         model.addAttribute("tasksCount", expandedTasks.size());
 
-        // === Счётчик невыполненных задач для календаря ===
         long calendarTasksCount = expandedTasks.stream()
                 .filter(t -> !t.getIsCompleted())
                 .count();
         model.addAttribute("calendarTasksCount", calendarTasksCount);
 
-        // === Актуальные задачи: просроченные + сегодня ===
         long startOfToday = now.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
         long endOfToday = now.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli() - 1;
 
@@ -150,14 +145,11 @@ public class WebMainController {
 
             String status;
             if (task.getDate() < startOfToday) {
-                // Просроченные: показываем только невыполненные
                 if (task.getIsCompleted()) continue;
                 status = "overdue";
             } else if (task.getDate() <= endOfToday) {
-                // Сегодня: показываем все (и выполненные, и нет)
                 status = task.getIsCompleted() ? "completed" : "today";
             } else {
-                // Будущие задачи на главной не показываем
                 continue;
             }
 
@@ -174,7 +166,6 @@ public class WebMainController {
             ));
         }
 
-        // Сортировка: просроченные -> сегодня (невыполненные) -> сегодня (выполненные)
         todayTasks.sort(Comparator.comparing((DashboardTask t) -> {
             switch (t.getStatus()) {
                 case "overdue": return 0;

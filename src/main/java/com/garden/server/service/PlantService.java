@@ -19,9 +19,6 @@ public class PlantService {
     private final PlantRepository plantRepository;
     private final UserRepository userRepository;
 
-    /**
-     * Создание нового личного растения
-     */
     @Transactional
     public PlantDto.Response createPlant(PlantDto.Request request, Long userId) {
         User user = userRepository.findById(userId)
@@ -38,9 +35,6 @@ public class PlantService {
         return mapToResponse(plantRepository.save(plant));
     }
 
-    /**
-     * Получение списка всех личных растений пользователя
-     */
     @Transactional(readOnly = true)
     public List<PlantDto.Response> getPlantsByUser(Long userId) {
         return plantRepository.findByUserId(userId).stream()
@@ -48,9 +42,6 @@ public class PlantService {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Получение конкретного растения по ID с проверкой прав доступа
-     */
     @Transactional(readOnly = true)
     public PlantDto.Response getPlantById(Long plantId, Long userId) {
         Plant plant = plantRepository.findById(plantId)
@@ -63,9 +54,6 @@ public class PlantService {
         return mapToResponse(plant);
     }
 
-    /**
-     * Обновление данных личного растения
-     */
     @Transactional
     public PlantDto.Response updatePlant(Long plantId, PlantDto.Request request, Long userId) {
         Plant plant = plantRepository.findById(plantId)
@@ -83,9 +71,6 @@ public class PlantService {
         return mapToResponse(plantRepository.save(plant));
     }
 
-    /**
-     * Удаление личного растения
-     */
     @Transactional
     public void deletePlant(Long plantId, Long userId) {
         Plant plant = plantRepository.findById(plantId)
@@ -98,9 +83,6 @@ public class PlantService {
         plantRepository.delete(plant);
     }
 
-    /**
-     * Вспомогательный метод для маппинга Entity в Response DTO
-     */
     private PlantDto.Response mapToResponse(Plant plant) {
         return PlantDto.Response.builder()
                 .id(plant.getId())

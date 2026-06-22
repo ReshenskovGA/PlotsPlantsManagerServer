@@ -17,8 +17,6 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String login) throws UsernameNotFoundException {
         User user = userRepository.findByLogin(login)
                 .orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден: " + login));
-
-        // Возвращаем нашу обертку вместо стандартного User.builder()...
         return new CustomUserDetails(user);
     }
 }

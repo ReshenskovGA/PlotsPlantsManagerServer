@@ -64,8 +64,6 @@ public class BedService {
         if (!bed.getUser().getId().equals(userId)) {
             throw new SecurityException("Доступ запрещен");
         }
-
-        // При обновлении участка проверяем, что новый участок тоже принадлежит пользователю
         if (!bed.getPlot().getId().equals(request.getPlotId())) {
             Plot newPlot = plotRepository.findById(request.getPlotId())
                     .orElseThrow(() -> new IllegalArgumentException("Новый участок не найден"));

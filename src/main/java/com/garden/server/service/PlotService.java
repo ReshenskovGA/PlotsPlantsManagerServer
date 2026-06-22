@@ -42,7 +42,6 @@ public class PlotService {
                 .collect(Collectors.toList());
     }
 
-    // НОВЫЙ МЕТОД: Получение участка по ID с проверкой прав
     @Transactional(readOnly = true)
     public PlotDto.Response getPlotById(Long plotId, Long userId) {
         Plot plot = plotRepository.findById(plotId)

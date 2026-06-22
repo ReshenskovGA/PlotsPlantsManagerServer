@@ -37,15 +37,12 @@ public class SecurityConfig {
                         .anyMatch(a -> "ROLE_MODERATOR".equals(a.getAuthority()));
 
                 if (isModerator) {
-                    // Модератор попадает сразу в свою панель
                     getRedirectStrategy().sendRedirect(request, response, "/web/moderator/users");
                 } else {
-                    // Обычный пользователь — в дашборд
                     getRedirectStrategy().sendRedirect(request, response, "/web/dashboard");
                 }
             }
         };
-        // Важно: не очищаем сохранённый запрос, чтобы после логина не было странных редиректов
         handler.setAlwaysUseDefaultTargetUrl(true);
         return handler;
     }
@@ -59,9 +56,9 @@ public class SecurityConfig {
                                 "/css/**", "/js/**", "/images/**", "/uploads/**").permitAll()
                         .requestMatchers("/api/v1/auth/**", "/api/v1/plants-const/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
-                        // Панель модератора — только для MODERATOR
+
                         .requestMatchers("/web/moderator/**").hasRole("MODERATOR")
-                        // Всё остальное веб — требует авторизации
+
                         .requestMatchers("/web/**").authenticated()
                         .requestMatchers("/api/v1/**").authenticated()
                         .anyRequest().permitAll()
@@ -71,7 +68,7 @@ public class SecurityConfig {
                         .loginProcessingUrl("/web/login")
                         .usernameParameter("login")
                         .passwordParameter("password")
-                        // Используем кастомный обработчик вместо defaultSuccessUrl
+
                         .successHandler(successHandler())
                         .failureUrl("/web/login?error=true")
                         .permitAll()

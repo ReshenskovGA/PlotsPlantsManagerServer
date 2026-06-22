@@ -43,17 +43,15 @@ public class WebPlantedPlantsController {
                 .orElseThrow(() -> new RuntimeException("Пользователь не найден в сессии"));
     }
 
-    // Класс для хранения информации о местоположении растения
     @Data
     @AllArgsConstructor
     public static class PlantLocation {
         private Long plotId;
         private String plotName;
-        private String objectType; // "Грядка" или "Дерево/Куст"
-        private Long objectId;     // ID грядки или дерева
+        private String objectType;
+        private Long objectId;
     }
 
-    // Класс для детальной информации о посаженном растении
     @Data
     @AllArgsConstructor
     public static class PlantedPlantDetails {
@@ -62,7 +60,7 @@ public class WebPlantedPlantsController {
         private String description;
         private List<String> categories;
         private List<String> photosUri;
-        private Boolean catalog; // Изменено на Boolean для корректной работы геттера getCatalog() в Thymeleaf
+        private Boolean catalog;
         private List<PlantLocation> locations = new ArrayList<>();
     }
 
@@ -71,18 +69,15 @@ public class WebPlantedPlantsController {
         Long userId = getCurrentUserId(auth);
         List<PlotDto.Response> plots = plotService.getPlotsByUser(userId);
 
-        // Используем Map для группировки растений и их мест посадки
         Map<Long, PlantedPlantDetails> plantMap = new LinkedHashMap<>();
 
         for (PlotDto.Response plot : plots) {
-            // Обработка грядок
             List<BedDto.Response> beds = bedService.getBedsByPlot(plot.getId(), userId);
             for (BedDto.Response bed : beds) {
                 if (bed.getPlantId() != null) {
                     addPlantToMap(plantMap, bed.getPlantId(), plot, "Грядка", bed.getId());
                 }
             }
-            // Обработка деревьев/кустов
             List<TreebushDto.Response> trees = treebushService.getTreebushByPlot(plot.getId(), userId);
             for (TreebushDto.Response tree : trees) {
                 if (tree.getPlantId() != null) {
@@ -91,7 +86,6 @@ public class WebPlantedPlantsController {
             }
         }
 
-        // Преобразуем Map в список и сортируем по названию
         List<PlantedPlantDetails> items = new ArrayList<>(plantMap.values());
         items.sort(Comparator.comparing(PlantedPlantDetails::getName));
 
@@ -120,7 +114,6 @@ public class WebPlantedPlantsController {
         }
     }
 
-    // Просмотр детальной информации о посаженном растении
 
     @GetMapping("/view/{plantId}")
     public String viewPlantedPlant(@PathVariable Long plantId,
@@ -129,7 +122,6 @@ public class WebPlantedPlantsController {
                                    Model model) {
         Long userId = getCurrentUserId(auth);
 
-        // Определяем тип растения по параметру source и формируем правильный ID со знаком
         boolean isCatalog = "catalog".equals(source);
         Long absId = Math.abs(plantId);
         Long signedPlantId = isCatalog ? -absId : absId;
@@ -145,19 +137,16 @@ public class WebPlantedPlantsController {
             details = new PlantedPlantDetails(signedPlantId, p.getName(), p.getDescription(), p.getCategories(), p.getPhotosUri(), false, new ArrayList<>());
         }
 
-        // 2. Находим все места посадки этого растения для текущего пользователя
         List<PlotDto.Response> plots = plotService.getPlotsByUser(userId);
         for (PlotDto.Response plot : plots) {
             List<BedDto.Response> beds = bedService.getBedsByPlot(plot.getId(), userId);
             for (BedDto.Response bed : beds) {
-                // ИСПРАВЛЕНИЕ: точное сравнение ID со знаком, чтобы избежать пересечений личных и справочных растений
                 if (bed.getPlantId() != null && bed.getPlantId().equals(signedPlantId)) {
                     details.getLocations().add(new PlantLocation(plot.getId(), plot.getName(), "Грядка", bed.getId()));
                 }
             }
             List<TreebushDto.Response> trees = treebushService.getTreebushByPlot(plot.getId(), userId);
             for (TreebushDto.Response tree : trees) {
-                // ИСПРАВЛЕНИЕ: точное сравнение ID со знаком
                 if (tree.getPlantId() != null && tree.getPlantId().equals(signedPlantId)) {
                     details.getLocations().add(new PlantLocation(plot.getId(), plot.getName(), "Дерево/Куст", tree.getId()));
                 }

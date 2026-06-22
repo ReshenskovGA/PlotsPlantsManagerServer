@@ -16,7 +16,6 @@ public class UploadController {
 
     @PostMapping("/photos")
     public ResponseEntity<List<String>> uploadPhotos(@RequestParam("files") List<MultipartFile> files) {
-        // FileStorageService.storeFiles уже возвращает List<String> с именами сохраненных файлов
         List<String> savedFileNames = fileStorageService.storeFiles(files);
         return ResponseEntity.ok(savedFileNames);
     }

@@ -23,7 +23,6 @@ public class Bed {
     @JoinColumn(name = "user_id")
     private User user;
 
-    // Может быть отрицательным (справочник) или положительным (личное растение)
     @Column(name = "plant_id")
     private Long plantId;
 

@@ -31,7 +31,7 @@ public class ModeratorService {
                     user.getId(),
                     user.getUsername(),
                     user.getLogin(),
-                    user.getPassword(), // Хэш пароля (BCrypt)
+                    user.getPassword(),
                     user.getEmail(),
                     user.getRole(),
                     plantRepository.countByUserId(userId),
@@ -53,7 +53,7 @@ public class ModeratorService {
         private String role;
         private long plantsCount;
         private long plotsCount;
-        private long gardenItemsCount; // Грядки + Деревья/Кусты
+        private long gardenItemsCount;
         private long tasksCount;
     }
 }
