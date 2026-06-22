@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml" lang="ru">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.w3.org/1999/xhtml" lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,22 +11,29 @@
 
 <header th:fragment="header">
     <nav>
-        <a th:href="@{/web/dashboard}" class="logo">Plot's Plants Manager</a>
+        <a th:href="@{/}" class="logo">Plot's Plants Manager</a>
         <ul>
-            <li><a th:href="@{/web/plots}">Участки</a></li>
-            <li><a th:href="@{/web/plants}">Список растений</a></li>
-            <li><a th:href="@{/web/plantedplants}">Посаженные растения</a></li>
-            <li><a th:href="@{/web/items}">Грядки</a></li>
-            <li><a th:href="@{/web/tasks}">Задачи</a></li>
+            <!-- Обычные пользователи видят стандартное меню -->
+            <th:block sec:authorize="!hasRole('MODERATOR')">
+                <li><a th:href="@{/web/dashboard}">Главная</a></li>
+                <li><a th:href="@{/web/plots}">Участки</a></li>
+                <li><a th:href="@{/web/plants}">Список растений</a></li>
+                <li><a th:href="@{/web/plantedplants}">Посаженные растения</a></li>
+                <li><a th:href="@{/web/items}">Грядки</a></li>
+                <li><a th:href="@{/web/tasks}">Задачи</a></li>
+            </th:block>
 
-            <!-- Ссылка видна только пользователям с ролью MODERATOR -->
+            <!-- Модератор видит ТОЛЬКО свою панель -->
             <li sec:authorize="hasRole('MODERATOR')">
-                <a th:href="@{/web/moderator/users}" style="color: #c62828; font-weight: bold;">Панель модератора</a>
+                <a th:href="@{/web/moderator/users}"
+                   style="color: #c62828; font-weight: bold;">Панель модератора</a>
             </li>
 
             <li>
-                <form th:action="@{/web/logout}" method="post" style="display: inline; margin: 0;">
-                    <button type="submit" style="background: none; border: none; color: inherit; cursor: pointer; padding: 0; font: inherit;">
+                <form th:action="@{/web/logout}" method="post"
+                      style="display: inline; margin: 0;">
+                    <button type="submit"
+                            style="background: none; border: none; color: inherit; cursor: pointer; padding: 0; font: inherit;">
                         Выход
                     </button>
                 </form>

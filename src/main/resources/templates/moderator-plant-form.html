@@ -7,26 +7,38 @@
 </head>
 <body>
 <div th:replace="~{layout :: header}"></div>
-<main style="max-width: 600px; margin: 2rem auto; padding: 2rem; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-    <h2 th:text="${plantId != null} ? 'Редактировать растение справочника' : 'Новое растение справочника'">Форма</h2>
-    <form th:action="@{/web/moderator/plants/save}" method="post" th:object="${plant}">
+
+<main style="max-width: 600px; margin: 2rem auto; padding: 2rem;
+             background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+    <h2 th:text="${plantId != null} ? 'Редактировать растение справочника' : 'Новое растение справочника'">
+        Форма
+    </h2>
+
+    <form th:action="@{/web/moderator/plants/save}"
+          method="post"
+          enctype="multipart/form-data"
+          th:object="${plant}">
+
         <input type="hidden" name="plantId" th:value="${plantId}">
 
         <div style="margin-bottom: 1rem;">
             <label>Название *</label>
-            <input type="text" th:field="*{name}" required style="width: 100%; padding: 0.5rem;">
+            <input type="text" th:field="*{name}" required
+                   style="width: 100%; padding: 0.5rem;">
         </div>
 
         <div style="margin-bottom: 1rem;">
             <label>Описание</label>
-            <textarea th:field="*{description}" rows="4" style="width: 100%; padding: 0.5rem;"></textarea>
+            <textarea th:field="*{description}" rows="4"
+                      style="width: 100%; padding: 0.5rem;"></textarea>
         </div>
 
         <div style="margin-bottom: 1.5rem;">
             <label style="font-weight: bold; display: block; margin-bottom: 0.5rem;">Категории:</label>
             <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
                 <div th:each="cat : ${allCategories}">
-                    <label style="display: flex; align-items: center; gap: 0.25rem; font-size: 0.9rem; cursor: pointer;">
+                    <label style="display: flex; align-items: center; gap: 0.25rem;
+                                  font-size: 0.9rem; cursor: pointer;">
                         <input type="checkbox" name="categories" th:value="${cat}"
                                th:checked="${plant.categories != null and plant.categories.contains(cat)}">
                         <span th:text="${cat}">Категория</span>
@@ -35,12 +47,47 @@
             </div>
         </div>
 
+        <!-- === ФОТОГРАФИИ === -->
+        <div style="margin-bottom: 1.5rem;">
+            <label style="font-weight: bold; display: block; margin-bottom: 0.5rem;">
+                Фотографии
+            </label>
+
+            <!-- Существующие фото с возможностью удаления -->
+            <div th:if="${plant.photosUri != null and !plant.photosUri.isEmpty()}"
+                 style="display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem;">
+                <div th:each="photo : ${plant.photosUri}"
+                     style="position: relative; border: 1px solid #ddd; padding: 0.5rem;
+                            border-radius: 4px; background: #fafafa;">
+                    <img th:src="@{/uploads/{file}(file=${photo})}"
+                         style="width: 100px; height: 100px; object-fit: cover;
+                                display: block; margin-bottom: 0.5rem; border-radius: 4px;">
+                    <label style="display: flex; align-items: center; gap: 0.25rem;
+                                  font-size: 0.85rem; cursor: pointer;">
+                        <input type="checkbox" name="keptPhotos" th:value="${photo}"
+                               checked style="width: auto; margin: 0;">
+                        Оставить
+                    </label>
+                </div>
+            </div>
+
+            <!-- Загрузка новых -->
+            <input type="file" name="photos" multiple accept="image/*"
+                   style="width: 100%; padding: 0.5rem; border: 1px dashed #ccc; border-radius: 4px;">
+            <small style="color: #666; display: block; margin-top: 0.25rem;">
+                Снимите галочку с существующего фото, чтобы удалить его.
+                Новые фото добавятся к оставленным.
+            </small>
+        </div>
+
         <div style="display: flex; gap: 1rem;">
             <button type="submit" class="btn btn-primary" style="flex: 1;">Сохранить</button>
-            <a th:href="@{/web/moderator/plants}" class="btn" style="flex: 1; text-align: center; background: #eee;">Отмена</a>
+            <a th:href="@{/web/moderator/plants}" class="btn"
+               style="flex: 1; text-align: center; background: #eee;">Отмена</a>
         </div>
     </form>
 </main>
+
 <div th:replace="~{layout :: footer}"></div>
 </body>
 </html>

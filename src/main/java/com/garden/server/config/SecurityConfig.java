@@ -1,12 +1,21 @@
 package com.garden.server.config;
 
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
+
+import java.io.IOException;
 
 @Configuration
 @EnableWebSecurity
@@ -18,18 +27,41 @@ public class SecurityConfig {
     }
 
     @Bean
+    public AuthenticationSuccessHandler successHandler() {
+        SimpleUrlAuthenticationSuccessHandler handler = new SimpleUrlAuthenticationSuccessHandler() {
+            @Override
+            public void onAuthenticationSuccess(HttpServletRequest request,
+                                                HttpServletResponse response,
+                                                Authentication authentication) throws IOException, ServletException {
+                boolean isModerator = authentication.getAuthorities().stream()
+                        .anyMatch(a -> "ROLE_MODERATOR".equals(a.getAuthority()));
+
+                if (isModerator) {
+                    // Модератор попадает сразу в свою панель
+                    getRedirectStrategy().sendRedirect(request, response, "/web/moderator/users");
+                } else {
+                    // Обычный пользователь — в дашборд
+                    getRedirectStrategy().sendRedirect(request, response, "/web/dashboard");
+                }
+            }
+        };
+        // Важно: не очищаем сохранённый запрос, чтобы после логина не было странных редиректов
+        handler.setAlwaysUseDefaultTargetUrl(true);
+        return handler;
+    }
+
+    @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.ignoringRequestMatchers("/api/v1/**", "/web/login"))
                 .authorizeHttpRequests(auth -> auth
-                        // Разрешаем доступ к главной странице, логину и статическим ресурсам
-                        .requestMatchers("/", "/index.html", "/web/login", "/web/register", "/css/**", "/js/**", "/images/**", "/uploads/**").permitAll()
-                        // Публичные REST API
+                        .requestMatchers("/", "/index.html", "/web/login", "/web/register",
+                                "/css/**", "/js/**", "/images/**", "/uploads/**").permitAll()
                         .requestMatchers("/api/v1/auth/**", "/api/v1/plants-const/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
-
+                        // Панель модератора — только для MODERATOR
                         .requestMatchers("/web/moderator/**").hasRole("MODERATOR")
-                        // Веб-страницы и REST API требуют авторизации
+                        // Всё остальное веб — требует авторизации
                         .requestMatchers("/web/**").authenticated()
                         .requestMatchers("/api/v1/**").authenticated()
                         .anyRequest().permitAll()
@@ -39,20 +71,20 @@ public class SecurityConfig {
                         .loginProcessingUrl("/web/login")
                         .usernameParameter("login")
                         .passwordParameter("password")
-                        .defaultSuccessUrl("/web/dashboard", true) // Перенаправление в дашборд после успешного входа
+                        // Используем кастомный обработчик вместо defaultSuccessUrl
+                        .successHandler(successHandler())
                         .failureUrl("/web/login?error=true")
                         .permitAll()
                 )
                 .rememberMe(remember -> remember
-                        .key("GardenAppUniqueSecretKey_2026") // Секретный ключ для подписи cookie (придумайте свой)
-                        .tokenValiditySeconds(86400)          // 24 часа в секундах (24 * 60 * 60)
-                        .rememberMeParameter("remember-me")   // Имя параметра, которое будет приходить из HTML формы
+                        .key("GardenAppUniqueSecretKey_2026")
+                        .tokenValiditySeconds(86400)
+                        .rememberMeParameter("remember-me")
                 )
                 .logout(logout -> logout
                         .logoutUrl("/web/logout")
                         .logoutSuccessUrl("/?logout=true")
                         .invalidateHttpSession(true)
-                        // ИСПРАВЛЕНИЕ: При выходе нужно удалять не только сессионную cookie, но и remember-me
                         .deleteCookies("JSESSIONID", "remember-me")
                         .permitAll()
                 );
